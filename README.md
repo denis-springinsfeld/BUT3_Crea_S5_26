@@ -50,3 +50,30 @@
 
 - Family: [Inter](https://fonts.google.com/specimen/Inter)
 - Weights: 400, 700
+
+
+## Data
+
+### Total par plateforme
+
+| Plateforme | Utilisateur | Total | Aujourd'hui |
+|---|---|---:|---:|
+| Facebook | @nathanf | 1 987 | +12 |
+| Twitter | @nathanf | 1 044 | -99 |
+| Instagram | @realnathanf | 11 283 | +1 099 |
+| YouTube | Nathan F. | 8 239 | -144 |
+
+### Statistiques du jour
+
+| Plateforme | Indicateur | Montant | Pourcentage |
+|---|---|---:|---:|
+| Facebook | Page views | 87 | +3% |
+| Facebook | Likes | 52 | -2% |
+| Instagram | Likes | 5 462 | +2 257% |
+| Instagram | Profile views | 52 366 | +1 375% |
+| Twitter | Retweets | 117 | +303% |
+| Twitter | Likes | 507 | +553% |
+| YouTube | Likes | 107 | -19% |
+| YouTube | Total views | 1 407 | -12% |
+
+**Total général : 23 004**
