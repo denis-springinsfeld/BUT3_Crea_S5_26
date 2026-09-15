@@ -592,56 +592,6 @@ const letterVariants = {
 >
 > Les consignes de ces deux exercices décrivent respectivement `layout` et une animation par caractère, mais les fichiers actuels n'utilisent pas encore ces fonctionnalités (`motion.div`/`layout` pour l'exercice 7 et `motion.span`/variants pour l'exercice 8). Il faut donc compléter leur implémentation pour que le code corresponde entièrement au cours.
 
-# Partie 11 — Effet de bord et compteur animé
-
-## 11.1 À quoi sert `useEffect` ?
-
-`useEffect` permet d'exécuter du code après le rendu d'un composant. Il est adapté aux effets de bord, c'est-à-dire aux actions qui ne consistent pas uniquement à calculer le JSX : lancer une animation, effectuer une requête réseau, écouter un événement ou modifier le document.
-
-```jsx
-import { useEffect } from "react";
-
-useEffect(() => {
-  // Code exécuté après le rendu
-}, []);
-```
-
-Le deuxième argument est le **tableau de dépendances** :
-
-| Tableau   | Quand l'effet est exécuté                       |
-| :-------- | :---------------------------------------------- |
-| absent    | Après chaque rendu                              |
-| `[]`      | Une fois au montage du composant                |
-| `[value]` | Au montage, puis chaque fois que `value` change |
-
-## 11.2 `useEffect` dans l'exercice 9
-
-Dans `Exercice9.jsx`, l'animation doit démarrer automatiquement lorsque le composant apparaît. L'effet appelle donc `launchAnimation` une seule fois :
-
-```jsx
-useEffect(() => {
-  launchAnimation();
-}, []);
-```
-
-Le déroulement est le suivant :
-
-1. React rend le composant avec `count` égal à `0`.
-2. Après ce rendu initial, `useEffect` appelle `launchAnimation`.
-3. `animate()` fait progresser la valeur de `0` à `100` pendant deux secondes.
-4. `onUpdate` reçoit chaque nouvelle valeur et `setCount` demande à React d'afficher le compteur à jour.
-5. Le bouton rappelle la même fonction pour relancer l'animation à la demande.
-
-L'effet ne doit pas être déclenché à chaque rendu : `setCount` provoque de nouveaux rendus, et un effet sans tableau de dépendances relancerait l'animation en boucle. Ici, `[]` indique que l'animation automatique est liée au montage du composant.
-
-> [!TIP]
-> **→ Exercice 9** (`Exercice9.jsx`)
->
-> - Utiliser `useState` pour conserver la valeur affichée du compteur.
-> - Utiliser `useEffect` avec `[]` pour lancer l'animation au montage.
-> - Utiliser `animate()` et `onUpdate` pour synchroniser la valeur animée avec le state React.
-> - Ajouter un bouton permettant de relancer l'animation.
-
 ---
 
 ## Récapitulatif — Tous les états d'animation
