@@ -4,6 +4,23 @@
 
 Motion est une librairie d'animation pour React, qui permet de créer des animations fluides et performantes avec une API simple et intuitive.
 
+## Sommaire
+
+| N°  | Thème                          | Concepts clés                                                         |
+| :-: | :----------------------------- | :-------------------------------------------------------------------- |
+|  0  | Fondamentaux                   | `motion.*`, `initial`, `animate`, `transition`, `variants`, `stagger` |
+|  1  | Application (Orchestration)    | Propagation parent → enfants, `delayChildren`, `staggerChildren`      |
+|  2  | Keyframes et Boucles           | Tableaux de valeurs, `repeat`, `repeatType`                           |
+|  3  | Interactions (Hover & Tap)     | `whileHover`, `whileTap`, `spring`                                    |
+|  4  | Animation SVG                  | `pathLength`, transitions par propriété                               |
+|  5  | Scroll Reveal                  | `whileInView`, `viewport`                                             |
+|  6  | AnimatePresence (Sortie)       | `<AnimatePresence>`, `exit`                                           |
+|  7  | Layout Animations              | `layout`, transitions de taille/position                              |
+|  8  | Text Animation (Par caractère) | `Array.from`, `staggerChildren`, transforms 3D                        |
+|  9  | Animation de chiffres          | `animate()`, `onUpdate`, `useEffect`, `useState`                      |
+
+---
+
 ## Installation
 
 Télécharger le projet et installer les dépendances :
@@ -18,60 +35,39 @@ Installer la librairie Motion :
 > npm install motion
 > ```
 
-Vous devez importer sur chaque composant React les éléments nécessaires depuis `motion/react` :
+Importer sur chaque composant React les éléments nécessaires depuis `motion/react` :
 
 ```jsx
 import { motion } from "motion/react";
 ```
 
-Exemple de base à testez dans `App.jsx`
+---
 
-```jsx
-<motion.div className="h-32 w-32 bg-yellow-500" animate={{ x: 100 }} />
+# Partie 1 — Les bases
+
+## 1.1 Le composant `motion.*`
+
+Pour animer un élément HTML, on remplace la balise standard par sa version `motion.` :
+
+```
+<h1>       →  <motion.h1>
+<div>      →  <motion.div>
+<button>   →  <motion.button>
+<span>     →  <motion.span>
+<svg>      →  <motion.svg>
+<path>     →  <motion.path>
 ```
 
---- text {.fragment}
+## 1.2 Les propriétés fondamentales
 
-## Exercice 0 : Les Fondamentaux
+| Propriété    | Rôle                                         |
+| :----------- | :------------------------------------------- |
+| `initial`    | État de départ au montage du composant.      |
+| `animate`    | État cible de l'animation.                   |
+| `transition` | Façon dont on passe de `initial` → `animate` |
+| `exit`       | État avant le démontage du composant.        |
 
-> [!TIPS]
-> **Objectif** : Comprendre le composant `motion` et les propriétés de base.
-> Consignes :
->
-> - Créer un titre qui apparaît avec un fondu et un changement d'échelle.
-> - Utiliser `initial`, `animate` et `transition`.
-> - Définir des `variants` pour séparer la logique du design.
-
-### Installation
-
-```bash
-npm install motion
-```
-
-```jsx
-import { motion, type Variants } from "motion/react";
-```
-
-### Composant `motion.*`
-
-Pour animer un élément HTML, on remplace la balise standard par sa version accessible via `motion.`.
-Exemple : `<h1>` devient `<motion.h1>`, `<div>` devient `<motion.div>`...
-
-### Propriétés fondamentales
-
-- `initial` : État de départ au montage du composant.
-- `animate` : État cible de l'animation.
-- `transition` : Façon dont on passe de `initial` vers `animate`.
-- `exit` : État avant le démontage du composant.
-
-Options courantes de `transition` :
-
-- `duration` : durée (en secondes)
-- `delay` : délai de départ
-- `ease` : courbe (`"easeInOut"`, `"linear"`, etc.)
-- `type` : `"spring"` (physique) ou `"tween"` (temporel)
-
-### Exemple (objet direct)
+### Exemple minimal
 
 ```jsx
 <motion.h1
@@ -84,14 +80,37 @@ Options courantes de `transition` :
 </motion.h1>
 ```
 
-### Les Variants
+## 1.3 Options de `transition`
 
-Les **variants** permettent de définir des objets de styles nommés. C'est la méthode recommandée pour séparer la logique d'animation du rendu JSX.
+| Propriété  | Description              | Exemple                   |
+| :--------- | :----------------------- | :------------------------ |
+| `duration` | Durée en secondes        | `0.5`                     |
+| `delay`    | Délai avant le démarrage | `0.2`                     |
+| `ease`     | Courbe d'accélération    | `"easeInOut"`, `"linear"` |
+| `type`     | Type d'animation         | `"spring"` ou `"tween"`   |
 
-```tsx
-const myVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
+- **`tween`** : animation temporelle classique (défaut pour `opacity`, `color`, etc.)
+- **`spring`** : animation physique à ressort (défaut pour `scale`, `x`, `y`, `rotate`)
+
+> [!TIP]
+> **→ Exercice 0** (`Exercice0.jsx`)
+>
+> - 1. Créer un titre qui apparaît avec un fondu et un changement d'échelle. Utiliser `initial`, `animate` et `transition`.
+> - 2. Définir des `variants` pour séparer la logique du design.
+> - 3. Utiliser `delayChildren` et `staggerChildren` pour orchestrer les enfants.
+
+---
+
+# Partie 2 — Les Variants
+
+## 2.1 Principe
+
+Les **variants** permettent de définir des états d'animation nommés, séparés du JSX. C'est la méthode recommandée.
+
+```jsx
+const myVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 };
 
 <motion.h1
@@ -104,120 +123,153 @@ const myVariants: Variants = {
 </motion.h1>;
 ```
 
-Pourquoi utiliser les variants :
+## 2.2 Avantages
 
-- Lisibilité : JSX plus propre
-- Réutilisabilité : mêmes états sur plusieurs composants
-- Propagation : parent/enfants coordonnés
-- Orchestration : synchronisation des animations
+| Avantage        | Explication                                   |
+| :-------------- | :-------------------------------------------- |
+| Lisibilité      | JSX plus propre, logique séparée              |
+| Réutilisabilité | Mêmes variants sur plusieurs composants       |
+| Propagation     | Coordination automatique parent → enfants     |
+| Orchestration   | Synchronisation des animations avec `stagger` |
 
----
+## 2.3 Bonnes pratiques de nommage
 
-## Exercice 1 : Orchestration (Stagger)
-
-> [!TIPS]
-> **Objectif** : Animer plusieurs éléments de manière séquentielle.
-> Consignes :
->
-> - Créer un conteneur parent et deux enfants.
-> - Utiliser `staggerChildren` dans le variant parent pour décaler l'apparition des enfants.
-> - Faire venir un enfant du haut et l'autre du bas.
-
-### États standard
-
-| Propriété     | Description                                                |
-| :------------ | :--------------------------------------------------------- |
-| `initial`     | État au montage du composant (ex: `hidden`).               |
-| `animate`     | État cible immédiat (ex: `visible`).                       |
-| `exit`        | État avant le démontage du DOM (avec `<AnimatePresence>`). |
-| `whileHover`  | État actif au survol.                                      |
-| `whileTap`    | État actif au clic / toucher.                              |
-| `whileInView` | État actif quand l'élément entre dans le viewport.         |
-
-### Propagation
-
-Si le parent est en `animate="visible"`, les enfants `motion.*` cherchent automatiquement le variant `visible` dans leur propre objet `variants`.
-
-### Orchestration
-
-Dans la transition du parent, `staggerChildren` décale le démarrage des enfants.
-
-```tsx
-visible: {
-  opacity: 1,
-  transition: {
-    staggerChildren: 0.3,
-  },
-}
-```
-
----
-
-## Exercice 2 : Keyframes et Boucles
-
-> [!TIPS]
-> **Objectif** : Créer des animations cycliques
-> complexes.
-> Consignes :
->
-> - Utiliser des tableaux de valeurs (keyframes) pour `scale`, `rotate` et `borderRadius`.
-> - Mettre en place une boucle infinie avec `repeat: Infinity` et `repeatType: "reverse"`.
-
-### Keyframes
-
-Au lieu d'une valeur unique, on peut passer un tableau pour faire une séquence d'états.
-
-```tsx
-animate={{
-  scale: [1, 2, 2, 1],
-  rotate: [0, 90, 180, 0],
-  borderRadius: ["20%", "20%", "50%", "20%"],
-}}
-```
-
-- Chaque étape partage la durée totale par défaut.
-- Pratique pour des animations plus complexes.
-
-### Boucles
-
-- `repeat: Infinity` : boucle infinie
-- `repeatDelay` : pause entre deux cycles
-- `repeatType` :
-  - `"loop"` : recommence au début
-  - `"reverse"` : joue en sens inverse un cycle sur deux
-  - `"mirror"` : alterne aller/retour
-
-### Bonnes pratiques de nommage
+Utiliser des noms sémantiques décrivant l'état visuel :
 
 - `hidden` / `visible`
 - `open` / `closed`
 - `offscreen` / `onscreen`
 - `active` / `inactive`
+- `rest` / `hover` / `tap`
 
 ---
 
-## Exercice 3 : Interactions (Hover & Tap)
+# Partie 3 — Orchestration (Stagger)
 
-> [!TIPS]
-> **Objectif** : Rendre l'interface réactive au curseur et au clic.
-> Consignes :
+## 3.1 Propagation automatique
+
+Quand un parent `motion.*` a `animate="visible"`, ses enfants `motion.*` cherchent **automatiquement** le variant `visible` dans leur propre objet `variants`.
+
+> Pas besoin de remettre `initial` et `animate` sur chaque enfant.
+
+## 3.2 `delayChildren` et `staggerChildren`
+
+| Propriété         | Rôle                                                         |
+| :---------------- | :----------------------------------------------------------- |
+| `delayChildren`   | Déclenche l'animation de **tous** les enfants après un délai |
+| `staggerChildren` | Décale le démarrage de chaque enfant successivement          |
+
+Ces propriétés se placent dans la `transition` du variant **parent** :
+
+```jsx
+// Variants du PARENT
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delayChildren: 0.2, // attend 0.2s avant le premier enfant
+      staggerChildren: 0.3, // 0.3s d'écart entre chaque enfant
+    },
+  },
+};
+
+// Variants des ENFANTS
+const childVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5 },
+  },
+};
+```
+
+```jsx
+<motion.div variants={containerVariants} initial="hidden" animate="visible">
+  <motion.div variants={childVariants} /> {/* démarre à 0.2s */}
+  <motion.div variants={childVariants} /> {/* démarre à 0.5s */}
+  <motion.div variants={childVariants} /> {/* démarre à 0.8s */}
+</motion.div>
+```
+
+> [!TIP]
+> **→ Exercice 1** (`Exercice1.jsx`)
 >
-> - Créer un bouton interactif utilisant `whileHover` et `whileTap`.
-> - Configurer une transition de type `spring` avec `stiffness` et `damping`.
-> - Utiliser des noms de variants sémantiques (`rest`, `hover`, `tap`).
+> - Créer un conteneur parent et deux enfants.
+> - Utiliser `delayChildren` et `staggerChildren` dans le variant parent pour décaler l'apparition des enfants.
+> - Faire venir un enfant du haut et l'autre du bas.
 
-### Interactions
+---
 
-- `whileHover` : animation au survol
-- `whileTap` : animation à l'appui
+# Partie 4 — Keyframes et Boucles
 
-### Réglages spring
+## 4.1 Keyframes
 
-- `stiffness` : tension du ressort (plus haut = plus nerveux)
-- `damping` : amortissement (plus bas = plus de rebond)
+Au lieu d'une valeur unique, on passe un **tableau** pour créer une séquence d'états :
 
-```tsx
-const buttonVariants: Variants = {
+```jsx
+<motion.div
+  animate={{
+    scale: [1, 2, 2, 1],
+    rotate: [0, 90, 180, 0],
+    borderRadius: ["20%", "20%", "50%", "20%"],
+  }}
+  transition={{ duration: 2 }}
+/>
+```
+
+Chaque étape se partage la durée totale de manière égale.
+
+## 4.2 Boucles
+
+| Propriété     | Valeur      | Description                            |
+| :------------ | :---------- | :------------------------------------- |
+| `repeat`      | `Infinity`  | Boucle infinie                         |
+| `repeat`      | `3`         | Répète 3 fois                          |
+| `repeatDelay` | `0.5`       | Pause entre deux cycles (en secondes)  |
+| `repeatType`  | `"loop"`    | Recommence au début                    |
+| `repeatType`  | `"reverse"` | Joue en sens inverse un cycle sur deux |
+| `repeatType`  | `"mirror"`  | Alterne aller / retour                 |
+
+```jsx
+transition={{
+  duration: 2,
+  repeat: Infinity,
+  repeatType: "reverse",
+}}
+```
+
+> [!TIP]
+> **→ Exercice 2** (`Exercice2.jsx`)
+>
+> - Utiliser des tableaux de valeurs (keyframes) pour `scale`, `rotate` et `borderRadius`.
+> - Mettre en place une boucle infinie avec `repeat: Infinity` et `repeatType: "reverse"`.
+
+---
+
+# Partie 5 — Interactions (Hover & Tap)
+
+## 5.1 Propriétés d'interaction
+
+| Propriété    | Déclencheur         |
+| :----------- | :------------------ |
+| `whileHover` | Survol de la souris |
+| `whileTap`   | Clic / toucher      |
+
+Ces propriétés acceptent un objet de style ou un nom de variant.
+
+## 5.2 Transition `spring` (ressort)
+
+| Propriété   | Rôle                                  | Valeur par défaut |
+| :---------- | :------------------------------------ | :---------------- |
+| `stiffness` | Tension du ressort (↑ = plus nerveux) | `100`             |
+| `damping`   | Amortissement (↓ = plus de rebond)    | `10`              |
+
+## 5.3 Exemple complet
+
+```jsx
+const buttonVariants = {
   rest: { scale: 1 },
   hover: {
     scale: 1.1,
@@ -238,134 +290,51 @@ const buttonVariants: Variants = {
 </motion.button>;
 ```
 
----
-
-## Exercice 4 : Le Drag (Glisser-Déposer)
-
-> [!TIPS]
-> **Objectif** : Manipuler des éléments à la souris.
-> Consignes :
+> [!TIP]
+> **→ Exercice 3** (`Exercice3.jsx`)
 >
-> - Rendre un carré déplaçable avec la propriété `drag`.
-> - Limiter la zone de mouvement avec `dragConstraints`.
-> - Ajouter un feedback visuel pendant le déplacement avec `whileDrag`.
-
-### Propriétés drag
-
-- `drag` : active le glisser-déposer (`true`, `"x"`, `"y"`)
-- `dragConstraints` : limites de déplacement
-- `dragTransition` : comportement inertie/rebond
-- `whileDrag` : style actif pendant le déplacement
-
-```tsx
-const boxVariants: Variants = {
-  hover: { scale: 1.1 },
-  tap: { scale: 0.9 },
-  drag: { scale: 1.2, boxShadow: "0px 10px 20px rgba(0,0,0,0.3)" },
-};
-
-<motion.div
-  variants={boxVariants}
-  drag
-  dragConstraints={{ top: -125, right: 125, bottom: 125, left: -125 }}
-  whileHover="hover"
-  whileTap="tap"
-  whileDrag="drag"
-/>;
-```
+> - Créer un bouton interactif utilisant `whileHover` et `whileTap`.
+> - Configurer une transition de type `spring` avec `stiffness` et `damping`.
+> - Utiliser des noms de variants sémantiques (`rest`, `hover`, `tap`).
 
 ---
 
-## Exercice 5 : Progression au Scroll
+# Partie 6 — Animation SVG
 
-> [!TIPS]
-> **Objectif** : Lier une animation au défilement de la page.
-> Consignes :
->
-> - Utiliser le hook `useScroll` pour récupérer la progression (`scrollYProgress`).
-> - Mapper cette progression sur une barre de remplissage.
-> - Utiliser `useSpring` pour lisser le mouvement et `offset` pour définir la zone d'activation.
+## 6.1 Tracé de chemin (`pathLength`)
 
-### `useScroll`
+| Valeur          | Rendu           |
+| :-------------- | :-------------- |
+| `pathLength: 0` | Tracé invisible |
+| `pathLength: 1` | Tracé complet   |
 
-Retourne des `MotionValue` de progression (0 -> 1), comme `scrollYProgress`.
+En animant `pathLength` de `0` à `1`, on obtient l'effet "dessin progressif".
 
-- `target` : `ref` de l'élément suivi
-- `offset` : règle le début/fin de la progression
+## 6.2 Transitions par propriété
 
-Format offset : `"position_cible position_conteneur"`
+On peut définir une transition **différente** pour chaque propriété animée :
 
-| Type      | Valeurs possibles        | Description                        |
-| :-------- | :----------------------- | :--------------------------------- |
-| Mots-clés | `start`, `center`, `end` | Repères relatifs (0%, 50%, 100%).  |
-| Nombres   | `0`, `0.5`, `1`          | Progression en pourcentage.        |
-| Pixels    | `100px`, `-50px`         | Position fixe par rapport au bord. |
-
-Combinaisons classiques :
-
-- `["start end", "end start"]`
-- `["start end", "start start"]`
-- `["0 0.5", "1 0.5"]`
-
-### Lissage avec `useSpring`
-
-```tsx
-const { scrollYProgress } = useScroll({ target: ref });
-const smoothProgress = useSpring(scrollYProgress, {
-  stiffness: 100,
-  damping: 30,
-});
-
-<motion.div style={{ scaleY: smoothProgress }} />;
-```
-
-Pour les `MotionValue` issues du scroll, privilégier `style` plutôt que `animate` pour éviter les re-renders React.
-
-### Débogage
-
-- Repères visuels en CSS (`position: fixed`)
-- `useMotionValueEvent` pour logger la progression
-
-```tsx
-import { useMotionValueEvent } from "motion/react";
-
-useMotionValueEvent(scrollYProgress, "change", (latest) => {
-  console.log("Progression:", latest);
-});
-```
-
----
-
-## Exercice 6 : Animation SVG
-
-> [!TIPS]
-> **Objectif** : Animer des tracés vectoriels
-> Consignes :
->
-> - Utiliser `pathLength` pour faire se dessiner une icône SVG.
-> - Définir des transitions spécifiques pour le tracé (`default`) et le remplissage (`fill`).
-> - Utiliser `repeatType: "reverse"` pour un effet de va-et-vient.
-
-### Tracé de chemin
-
-- `pathLength: 0` : tracé invisible
-- `pathLength: 1` : tracé complet
-
-```tsx
+```jsx
 transition: {
-  default: { duration: 2, ease: "easeInOut" },
-  fill: { duration: 2, ease: "easeIn", delay: 1 }
+  default: { duration: 2, ease: "easeInOut" },  // pour pathLength
+  fill: { duration: 2, ease: "easeIn", delay: 1 } // pour fill (décalé)
 }
 ```
 
-```tsx
-const svgIconVariants: Variants = {
-  hidden: { pathLength: 0, fill: "rgba(255, 255, 255, 0)" },
+## 6.3 Exemple complet
+
+```jsx
+const svgIconVariants = {
+  hidden: {
+    pathLength: 0,
+    fill: "rgba(255, 255, 255, 0)",
+  },
   visible: {
     pathLength: 1,
     fill: "rgba(255, 255, 255, 1)",
     transition: {
       default: { duration: 2, repeat: Infinity, repeatType: "reverse" },
+      fill: { duration: 2, ease: "easeIn", delay: 1 },
     },
   },
 };
@@ -376,30 +345,41 @@ const svgIconVariants: Variants = {
     variants={svgIconVariants}
     initial="hidden"
     animate="visible"
+    stroke="white"
+    strokeWidth={0.5}
   />
 </motion.svg>;
 ```
 
+> **Important** : Pour que `pathLength` fonctionne, il faut utiliser `<motion.path>` (pas `<path>`), et le SVG doit contenir un `stroke`.
+
+> [!TIP]
+> **→ Exercice 4** (`Exercice4.jsx`)
+>
+> - Utiliser `pathLength` pour faire "se dessiner" une icône SVG.
+> - Définir des transitions spécifiques pour le tracé (`default`) et le remplissage (`fill`).
+> - Utiliser `repeatType: "reverse"` pour un effet de va-et-vient.
+
 ---
 
-## Exercice 7 : Scroll Reveal
+# Partie 7 — Scroll Reveal (`whileInView`)
 
-> [!TIPS]
-> **Objectif** : Déclencher des animations à l'entrée dans l'écran.
-> Consignes :
->
-> - Utiliser `whileInView` au lieu de `animate`.
-> - Configurer `viewport` avec `once: false` et `amount` pour contrôler le déclenchement.
-> - Utiliser des noms sémantiques `offscreen` et `onscreen`.
+## 7.1 Principe
 
-### Rappels
+`whileInView` remplace `animate` pour déclencher l'animation **quand l'élément entre dans la zone visible** du navigateur.
 
-- `whileInView` lance l'animation quand l'élément entre dans la zone visible.
-- `viewport.once` : joue une seule fois si `true`.
-- `viewport.amount` : proportion visible requise.
-- `viewport.margin` : marge virtuelle de déclenchement.
+## 7.2 Propriétés
 
-```tsx
+| Propriété         | Rôle                                                        |
+| :---------------- | :---------------------------------------------------------- |
+| `whileInView`     | Lance l'animation quand l'élément entre dans le viewport    |
+| `viewport.once`   | Si `true`, joue une seule fois (ne revient pas à `initial`) |
+| `viewport.amount` | Proportion de l'élément qui doit être visible (`0` à `1`)   |
+| `viewport.margin` | Marge virtuelle de déclenchement (ex: `"-100px"`)           |
+
+## 7.3 Exemple
+
+```jsx
 const variants = {
   offscreen: { opacity: 0, y: 50 },
   onscreen: {
@@ -417,165 +397,253 @@ const variants = {
 />;
 ```
 
+- `once: false` → l'animation se rejoue à chaque entrée/sortie
+- `amount: 0.5` → l'élément doit être visible à 50% pour déclencher
+
+> [!TIP]
+> **→ Exercice 5** (`Exercice5.jsx`)
+>
+> - Utiliser `whileInView` au lieu de `animate`.
+> - Configurer `viewport` avec `once: false` et `amount` pour contrôler le déclenchement.
+> - Utiliser des noms sémantiques `offscreen` et `onscreen`.
+
 ---
 
-## Exercice 8 : AnimatePresence (Sortie)
+# Partie 8 — AnimatePresence (Sortie)
 
-> [!TIPS]
-> **Objectif** : Animer la disparition d'un élément.
-> Consignes :
+## 8.1 Le problème
+
+Sans `AnimatePresence`, React **retire immédiatement** un composant du DOM quand la condition de rendu devient `false`. Aucune animation de sortie n'est possible.
+
+## 8.2 La solution
+
+`<AnimatePresence>` enveloppe les éléments conditionnels et leur permet de jouer leur animation `exit` avant d'être retirés du DOM.
+
+```jsx
+import { motion, AnimatePresence } from "motion/react";
+```
+
+## 8.3 Propriétés
+
+| Propriété          | Rôle                             |
+| :----------------- | :------------------------------- |
+| `initial`          | État d'entrée                    |
+| `animate`          | État stable                      |
+| `exit`             | État de sortie (avant démontage) |
+| `mode="popLayout"` | Évite les sauts de layout        |
+
+## 8.4 Exemple
+
+```jsx
+const [isVisible, setIsVisible] = useState(true);
+
+<AnimatePresence mode="popLayout">
+  {isVisible && (
+    <motion.div
+      key="box"
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0 }}
+      transition={{ duration: 0.3 }}
+      className="h-32 w-32 rounded-2xl bg-indigo-400"
+    />
+  )}
+</AnimatePresence>;
+```
+
+> **Important** : L'élément conditionnel doit avoir une prop `key` unique pour que Motion puisse suivre son cycle de vie.
+
+> [!TIP]
+> **→ Exercice 6** (`Exercice6.jsx`)
 >
 > - Utiliser le composant `<AnimatePresence>`.
 > - Définir une propriété `exit` sur l'élément motion.
 > - Créer un bouton pour masquer/afficher un élément avec une transition fluide à la fermeture.
 
-### Rappels
-
-Sans `AnimatePresence`, React retire le composant immédiatement. Avec `AnimatePresence`, le composant reste dans le DOM le temps de jouer `exit`.
-
-- `initial` : état d'entrée
-- `animate` : état stable
-- `exit` : état de sortie
-- `mode="popLayout"` : évite les sauts de layout
-
 ---
 
-## Exercice 9 : Layout Animations
+# Partie 9 — Layout Animations
 
-> [!TIPS]
-> **Objectif** : Animer les changements de structure CSS.
-> Consignes :
+## 9.1 Principe
+
+La prop `layout` anime **automatiquement** les changements de taille, position et `borderRadius` quand la mise en page CSS change.
+
+```jsx
+<motion.div layout />
+```
+
+## 9.2 Comment ça marche
+
+1. Motion capture la position/taille **avant** le re-render
+2. React effectue le re-render (changement de classes, taille, position…)
+3. Motion capture la **nouvelle** position/taille
+4. Motion anime la transition entre les deux états via `transform`
+
+## 9.3 Exemple
+
+```jsx
+const [isExpanded, setIsExpanded] = useState(false);
+
+<motion.div
+  layout
+  onClick={() => setIsExpanded(!isExpanded)}
+  style={{
+    width: isExpanded ? "100%" : "96px",
+    height: isExpanded ? "100%" : "96px",
+    borderRadius: isExpanded ? "40px" : "12px",
+  }}
+  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+  className="cursor-pointer bg-pink-500"
+/>;
+```
+
+> **Cas d'usage** : accordéons, cartes expansibles, grilles réorganisables.
+
+> [!TIP]
+> **→ Exercice 7** (`Exercice7.jsx`)
 >
 > - Utiliser la prop `layout`.
 > - Créer un carré qui s'agrandit pour remplir son conteneur au clic.
 > - Observer comment Motion gère automatiquement la transition de taille et de `borderRadius`.
 
-### Rappels
-
-La prop `layout` anime automatiquement les changements de taille/position/rayon lorsque la mise en page change.
-
-- Idéal pour accordéons et cartes expansibles
-- Basé sur les transforms pour rester fluide
-
 ---
 
-## Exercice 10 : Shared Layout (`layoutId`)
+# Partie 10 — Text Animation (Par caractère)
 
-> [!TIPS]
-> **Objectif** : Créer des transitions fluides entre composants distincts.
-> Consignes :
+## 10.1 Méthode
+
+1. **Découper** le texte en tableau de caractères avec `Array.from()` ou `.split("")`
+2. **Envelopper** chaque caractère dans un `<motion.span>`
+3. **Orchestrer** avec `staggerChildren` sur le conteneur parent
+
+## 10.2 Points clés
+
+| Point               | Détail                                          |
+| :------------------ | :---------------------------------------------- |
+| `display`           | Chaque lettre doit être en `inline-block`       |
+| `staggerChildren`   | Sur le conteneur pour décaler chaque lettre     |
+| Gestion des espaces | Prévoir un `minWidth` ou `marginRight` pour ` ` |
+| `perspective`       | Optionnel, pour les effets de rotation 3D       |
+
+## 10.3 Exemple
+
+```jsx
+const text = "Hello World";
+const letters = Array.from(text);
+
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const letterVariants = {
+  hidden: { opacity: 0, y: 20, rotateX: -90 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    transition: { type: "spring", damping: 12 },
+  },
+};
+
+<motion.h1
+  variants={containerVariants}
+  initial="hidden"
+  animate="visible"
+  style={{ perspective: 500 }}
 >
-> - Créer un système d'onglets (tabs).
-> - Utiliser `layoutId` pour faire voyager l'indicateur de sélection (la pilule) d'un bouton à l'autre.
+  {letters.map((letter, index) => (
+    <motion.span
+      key={index}
+      variants={letterVariants}
+      className="inline-block"
+      style={{
+        marginRight: letter === " " ? "0.3em" : "0.02em",
+        minWidth: letter === " " ? "0.3em" : "auto",
+      }}
+    >
+      {letter}
+    </motion.span>
+  ))}
+</motion.h1>;
+```
 
-### Rappels
-
-Deux éléments avec le même `layoutId` sont interprétés comme le même objet visuel au travers d'états différents du DOM.
-
-- Très utile pour un indicateur actif (tabs, menus)
-- Crée une transition continue entre deux composants distincts
-
----
-
-## Exercice 11 : Transformations de valeurs (`useTransform`)
-
-> [!TIPS]
-> **Objectif** : Créer des effets de parallaxe ou de liaison complexe.
-> Consignes :
->
-> - Utiliser `useTransform` pour lier la progression du scroll à la rotation et à l'opacité d'une carte.
-> - Créer un effet d'entrée dynamique où l'élément se redresse en scrollant.
-
-### Rappels
-
-`useTransform(source, [inMin, inMax], [outMin, outMax])`
-
-- Exemple : mapper le scroll `0..1` vers une rotation `0..360`
-- Utilisé avec `style`
-
----
-
-## Exercice 12 : Listes réordonnables (`Reorder`)
-
-> [!TIPS]
-> **Objectif** : Créer une liste drag-and-drop fonctionnelle.
-> Consignes :
->
-> - Utiliser `<Reorder.Group>` et `<Reorder.Item>`.
-> - Lier l'état d'un tableau React à la liste pour permettre la réorganisation réelle des éléments.
-
-### Rappels
-
-`<Reorder.Group>` et `<Reorder.Item>` simplifient le drag-and-drop d'une liste.
-
-- Gestion native du réordonnancement
-- Animations automatiques des items qui se déplacent
-- Compatible avec `whileDrag` pour le feedback visuel
-
----
-
-## Exercice 13 : Text Animation (Par caractère)
-
-> [!TIPS]
-> **Objectif** : Animer un texte lettre par lettre.
-> Consignes :
+> [!TIP]
+> **→ Exercice 8** (`Exercice8.jsx`)
 >
 > - Découper un texte en tableau de caractères.
 > - Utiliser `staggerChildren` pour un effet de vague ou de révélation séquentielle.
 > - Ajouter des transformations 3D (`rotateX`, `perspective`) pour un rendu premium.
 
-### Méthode
+> [!NOTE]
+> **Vérification des exercices 7 et 8**
+>
+> Les consignes de ces deux exercices décrivent respectivement `layout` et une animation par caractère, mais les fichiers actuels n'utilisent pas encore ces fonctionnalités (`motion.div`/`layout` pour l'exercice 7 et `motion.span`/variants pour l'exercice 8). Il faut donc compléter leur implémentation pour que le code corresponde entièrement au cours.
 
-Découper le texte en lettres (`Array.from` ou `split`) puis animer chaque lettre comme enfant motion.
+# Partie 11 — Effet de bord et compteur animé
 
-Points clés :
+## 11.1 À quoi sert `useEffect` ?
 
-- Chaque lettre en `inline-block`
-- `staggerChildren` sur le conteneur
-- `perspective` possible pour les effets 3D
+`useEffect` permet d'exécuter du code après le rendu d'un composant. Il est adapté aux effets de bord, c'est-à-dire aux actions qui ne consistent pas uniquement à calculer le JSX : lancer une animation, effectuer une requête réseau, écouter un événement ou modifier le document.
 
-```tsx
-const letters = Array.from("Hello");
+```jsx
+import { useEffect } from "react";
 
-<motion.h1 variants={container} initial="hidden" animate="visible">
-  {letters.map((l) => (
-    <motion.span variants={letter}>{l}</motion.span>
-  ))}
-</motion.h1>;
+useEffect(() => {
+  // Code exécuté après le rendu
+}, []);
 ```
+
+Le deuxième argument est le **tableau de dépendances** :
+
+| Tableau   | Quand l'effet est exécuté                       |
+| :-------- | :---------------------------------------------- |
+| absent    | Après chaque rendu                              |
+| `[]`      | Une fois au montage du composant                |
+| `[value]` | Au montage, puis chaque fois que `value` change |
+
+## 11.2 `useEffect` dans l'exercice 9
+
+Dans `Exercice9.jsx`, l'animation doit démarrer automatiquement lorsque le composant apparaît. L'effet appelle donc `launchAnimation` une seule fois :
+
+```jsx
+useEffect(() => {
+  launchAnimation();
+}, []);
+```
+
+Le déroulement est le suivant :
+
+1. React rend le composant avec `count` égal à `0`.
+2. Après ce rendu initial, `useEffect` appelle `launchAnimation`.
+3. `animate()` fait progresser la valeur de `0` à `100` pendant deux secondes.
+4. `onUpdate` reçoit chaque nouvelle valeur et `setCount` demande à React d'afficher le compteur à jour.
+5. Le bouton rappelle la même fonction pour relancer l'animation à la demande.
+
+L'effet ne doit pas être déclenché à chaque rendu : `setCount` provoque de nouveaux rendus, et un effet sans tableau de dépendances relancerait l'animation en boucle. Ici, `[]` indique que l'animation automatique est liée au montage du composant.
+
+> [!TIP]
+> **→ Exercice 9** (`Exercice9.jsx`)
+>
+> - Utiliser `useState` pour conserver la valeur affichée du compteur.
+> - Utiliser `useEffect` avec `[]` pour lancer l'animation au montage.
+> - Utiliser `animate()` et `onUpdate` pour synchroniser la valeur animée avec le state React.
+> - Ajouter un bouton permettant de relancer l'animation.
 
 ---
 
-## Bonnes pratiques transversales
+## Récapitulatif — Tous les états d'animation
 
-### Accessibilité
+| Propriété     | Déclencheur                        |
+| :------------ | :--------------------------------- |
+| `initial`     | Montage du composant               |
+| `animate`     | Immédiat (état cible)              |
+| `exit`        | Démontage (avec `AnimatePresence`) |
+| `whileHover`  | Survol                             |
+| `whileTap`    | Clic / toucher                     |
+| `whileInView` | Entrée dans le viewport            |
+| `whileDrag`   | Pendant un glisser-déposer         |
 
-- Respecter `prefers-reduced-motion` avec le hook `useReducedMotion` pour proposer une animation raccourcie ou désactivée.
-- Ne pas communiquer une information uniquement par le mouvement : le texte, la couleur ou l'état doivent rester compréhensibles sans animation.
-- Conserver un élément interactif natif (`button`, `a`) plutôt qu'un `div` cliquable.
-
-```tsx
-import { motion, useReducedMotion } from "motion/react";
-
-const shouldReduceMotion = useReducedMotion();
-
-<motion.div
-  animate={{ x: shouldReduceMotion ? 0 : 100 }}
-  transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
-/>;
-```
-
-### Tactile et performance
-
-- Pour un élément déplaçable sur mobile, prévoir `touch-action: none` sur la zone de drag.
-- Préférer `transform` et `opacity`, généralement plus fluides que des changements fréquents de dimensions ou de position CSS.
-- Utiliser `style` avec une `MotionValue` pour les valeurs liées au scroll afin d'éviter des re-renders React inutiles.
-
-### Vérification
-
-Pour chaque exercice, vérifier au minimum :
-
-- l'état initial et l'état final ;
-- le comportement clavier des contrôles ;
-- le comportement avec une réduction des animations activée ;
-- l'absence de débordement sur petit écran.
+---

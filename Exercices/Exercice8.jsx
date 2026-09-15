@@ -1,5 +1,5 @@
 /**
- * ## Exercice 13 : Text Animation (Par caractère)
+ * ## Exercice 8 : Text Animation (Par caractère)
  * **Objectif** : Animer un texte lettre par lettre.
  * - Découper un texte en tableau de caractères.
  * - Utiliser `staggerChildren` pour un effet de "vague" ou de révélation séquentielle.
@@ -7,7 +7,7 @@
  */
 const text = "L'ART DU MOUVEMENT";
 
-export default function Exercice13() {
+export default function Exercice8() {
   const letters = Array.from(text);
 
   return (

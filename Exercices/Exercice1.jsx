@@ -1,6 +1,6 @@
 /**
  * ## Exercice 1 : Orchestration (Stagger)
- * **Objectif** : Animer plusieurs éléments de manière séquentielle.
+ *  Objectif : Animer plusieurs éléments de manière séquentielle.
  * - Créer un conteneur parent et deux enfants.
  * - Utiliser `staggerChildren` dans le variant parent pour décaler l'apparition des enfants.
  * - Faire venir un enfant du haut et l'autre du bas.

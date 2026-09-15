@@ -1,11 +1,11 @@
 /**
- * ## Exercice 6 : Animation SVG
- * **Objectif** : Animer des tracés vectoriels.
+ * ## Exercice 4 : Animation SVG
+ * Objectif : Animer des tracés vectoriels.
  * - Utiliser `pathLength` pour faire "se dessiner" une icône SVG.
  * - Définir des transitions spécifiques pour le tracé (`default`) et le remplissage (`fill`).
  * - Utiliser `repeatType: "reverse"` pour un effet de va-et-vient.
  */
-export default function Exercice6() {
+export default function Exercice4() {
   return (
     <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
       <svg

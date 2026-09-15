@@ -1,6 +1,6 @@
 /**
  * ## Exercice 2 : Keyframes et Boucles
- * **Objectif** : Créer des animations cycliques complexes.
+ * Objectif : Créer des animations cycliques complexes.
  * - Utiliser des tableaux de valeurs (keyframes) pour les propriétés `scale`, `rotate` et `borderRadius`.
  * - Mettre en place une boucle infinie avec `repeat: Infinity` et `repeatType: "reverse"`.
  */

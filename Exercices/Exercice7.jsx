@@ -1,5 +1,5 @@
 /**
- * ## Exercice 9 : Layout Animations
+ * ## Exercice 7 : Layout Animations
  * **Objectif** : Animer les changements de structure CSS.
  * - Utiliser la prop `layout`.
  * - Créer un carré qui s'agrandit pour remplir son conteneur au clic.
@@ -7,7 +7,7 @@
  */
 import { useState } from "react";
 
-export default function Exercice9() {
+export default function Exercice7() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (

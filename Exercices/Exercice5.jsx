@@ -1,11 +1,11 @@
 /**
- * ## Exercice 7 : Scroll Reveal
+ * ## Exercice 5 : Scroll Reveal
  * **Objectif** : Déclencher des animations à l'entrée dans l'écran.
  * - Utiliser `whileInView` au lieu de `animate`.
  * - Configurer `viewport` avec `once: false` et `amount` pour contrôler le déclenchement.
  * - Utiliser des noms sémantiques `offscreen` et `onscreen`.
  */
-export default function Exercice7() {
+export default function Exercice5() {
   return (
     <section className="mb-20 flex flex-col gap-10 py-20">
       <h1 className="text-center text-6xl font-bold tracking-tight text-white">

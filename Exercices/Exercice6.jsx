@@ -1,5 +1,5 @@
 /**
- * ## Exercice 8 : AnimatePresence (Sortie)
+ * ## Exercice 6 : AnimatePresence (Sortie)
  * **Objectif** : Animer la disparition d'un élément.
  * - Utiliser le composant `<AnimatePresence>`.
  * - Définir une propriété `exit` sur l'élément motion.
@@ -7,7 +7,7 @@
  */
 import { useState } from "react";
 
-export default function Exercice8() {
+export default function Exercice6() {
   const [isVisible, setIsVisible] = useState(true);
 
   return (

@@ -1,6 +1,6 @@
 /**
  * ## Exercice 3 : Interactions (Hover & Tap)
- * **Objectif** : Rendre l'interface réactive au curseur et au clic.
+ * Objectif : Rendre l'interface réactive au curseur et au clic.
  * - Créer un bouton interactif utilisant `whileHover` et `whileTap`.
  * - Configurer une transition de type `spring` (ressort) avec `stiffness` et `damping`.
  * - Utiliser des noms de variants sémantiques (`rest`, `hover`, `tap`).
