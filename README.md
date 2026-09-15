@@ -23,7 +23,7 @@ Motion est une librairie d'animation pour React, qui permet de créer des animat
 
 ## Installation
 
-Télécharger le projet et installer les dépendances :
+Créer un nouveau projet ou utiliser un projet existant et installer les dépendances :
 
 > ```bash
 > npm install
@@ -93,11 +93,9 @@ Pour animer un élément HTML, on remplace la balise standard par sa version `mo
 - **`spring`** : animation physique à ressort (défaut pour `scale`, `x`, `y`, `rotate`)
 
 > [!TIP]
-> **→ Exercice 0** (`Exercice0.jsx`)
+> **→ Exercice 0 Partie 1** (`Exercice0.jsx`)
 >
 > - 1. Créer un titre qui apparaît avec un fondu et un changement d'échelle. Utiliser `initial`, `animate` et `transition`.
-> - 2. Définir des `variants` pour séparer la logique du design.
-> - 3. Utiliser `delayChildren` et `staggerChildren` pour orchestrer les enfants.
 
 ---
 
