@@ -142,6 +142,11 @@ Utiliser des noms sémantiques décrivant l'état visuel :
 - `active` / `inactive`
 - `rest` / `hover` / `tap`
 
+> [!TIP]
+> **→ Exercice 0 partie 2** (`Exercice0.jsx`)
+>
+> - 2. Définir des `variants` pour séparer la logique du design.
+
 ---
 
 # Partie 3 — Orchestration (Stagger)
@@ -192,6 +197,13 @@ const childVariants = {
   <motion.div variants={childVariants} /> {/* démarre à 0.8s */}
 </motion.div>
 ```
+
+> [!TIP]
+> **→ Exercice 0 partie 3** (`Exercice0.jsx`)
+>
+> - 3. Utiliser `delayChildren` et `staggerChildren` pour orchestrer les enfants.
+
+### Application
 
 > [!TIP]
 > **→ Exercice 1** (`Exercice1.jsx`)
