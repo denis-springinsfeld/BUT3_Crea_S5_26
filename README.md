@@ -2,6 +2,36 @@
 
 [Docs motion pour React](https://motion.dev/docs/react)
 
+Motion est une librairie d'animation pour React, qui permet de créer des animations fluides et performantes avec une API simple et intuitive.
+
+## Installation
+
+Télécharger le projet et installer les dépendances :
+
+> ```bash
+> npm install
+> ```
+
+Installer la librairie Motion :
+
+> ```bash
+> npm install motion
+> ```
+
+Vous devez importer sur chaque composant React les éléments nécessaires depuis `motion/react` :
+
+```jsx
+import { motion } from "motion/react";
+```
+
+Exemple de base à testez dans `App.jsx`
+
+```jsx
+<motion.div className="h-32 w-32 bg-yellow-500" animate={{ x: 100 }} />
+```
+
+--- text {.fragment}
+
 ## Exercice 0 : Les Fondamentaux
 
 > [!TIPS]
