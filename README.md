@@ -96,6 +96,69 @@ Pour animer un élément HTML, on remplace la balise standard par sa version `mo
 >
 > - 1. Créer un titre qui apparaît avec un fondu et un changement d'échelle. Utiliser `initial`, `animate` et `transition`.
 
+<details>
+<summary>Solution</summary>
+
+```jsx
+import { motion } from "motion/react";
+
+// Utilisation de Variants pour définir les états de l'animation
+// 'hidden' : état initial
+// 'visible' : état final
+// 'transition' : paramètres de l'animation
+//  'delayChildren': déclenche l'animation de tous les enfants après un délai
+//  'staggerChildren': déclenche les animations des enfants les unes après les autres
+const containerVariants = {
+  hidden: { opacity: 0, y: -50 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+
+      // delayChildren: déclenche l'animation de tous les enfants après un délai
+      delayChildren: 1,
+      // staggerChildren: déclenche les animations des enfants les unes après les autres
+      staggerChildren: 2,
+    },
+  },
+};
+
+const spanVariants = {
+  hidden: { opacity: 0, scale: 0, rotate: -180 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotate: 0,
+    transition: { duration: 0.5, type: "spring", stiffness: 200 },
+  },
+};
+
+export default function Exercice0() {
+  return (
+    <motion.h1
+      className="text-5xl font-bold"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      Hello{" "}
+      <motion.span
+        className="inline-block text-blue-500"
+        variants={spanVariants}
+      >
+        World&nbsp;
+      </motion.span>
+      <motion.span className="inline-block" variants={spanVariants}>
+        !!
+      </motion.span>
+    </motion.h1>
+  );
+}
+```
+
+</details>
+
 ---
 
 # Partie 2 — Les Variants
@@ -143,6 +206,87 @@ Utiliser des noms sémantiques décrivant l'état visuel :
 > **→ Exercice 0 partie 2** (`Exercice0.jsx`)
 >
 > - 2. Définir des `variants` pour séparer la logique du design.
+
+<details>
+<summary>Solution</summary>
+
+```jsx
+import { motion } from "motion/react";
+
+/**
+ * ## Exercice 1 : Orchestration (Stagger)
+ *  Objectif : Animer plusieurs éléments de manière séquentielle.
+ * - Créer un conteneur parent et deux enfants.
+ * - Utiliser `staggerChildren` dans le variant parent pour décaler l'apparition des enfants.
+ * - Faire venir un enfant du haut et l'autre du bas.
+ */
+
+/**
+ * Un conteneur parent qui anime ses enfants de manière séquentielle.
+ */
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      delayChildren: 1, // Délai avant le début de l'animation des enfants
+      staggerChildren: 1, // Délai entre l'apparition des deux éléments
+    },
+  },
+};
+
+/**
+ * Un carré qui provient du bas.
+ */
+
+const itemBottomVariants = {
+  hidden: { opacity: 0, y: 100 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
+/**
+ * Un cercle qui provient du haut.
+ */
+
+const itemTopVariants = {
+  hidden: { opacity: 0, y: -100 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
+export default function Exercice1() {
+  return (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800"
+    >
+      {/* Carré : provient du bas */}
+      <motion.div
+        variants={itemBottomVariants}
+        className="h-20 w-20 rounded-lg bg-stone-100"
+      ></motion.div>
+
+      {/* Cercle : provient du haut */}
+      <motion.div
+        variants={itemTopVariants}
+        className="h-20 w-20 rounded-full bg-stone-100"
+      ></motion.div>
+    </motion.div>
+  );
+}
+```
+
+</details>
 
 ---
 
