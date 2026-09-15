@@ -17,7 +17,6 @@ Motion est une librairie d'animation pour React, qui permet de créer des animat
 |  6  | AnimatePresence (Sortie)       | `<AnimatePresence>`, `exit`                                           |
 |  7  | Layout Animations              | `layout`, transitions de taille/position                              |
 |  8  | Text Animation (Par caractère) | `Array.from`, `staggerChildren`, transforms 3D                        |
-|  9  | Animation de chiffres          | `animate()`, `onUpdate`, `useEffect`, `useState`                      |
 
 ---
 
@@ -586,11 +585,6 @@ const letterVariants = {
 > - Découper un texte en tableau de caractères.
 > - Utiliser `staggerChildren` pour un effet de vague ou de révélation séquentielle.
 > - Ajouter des transformations 3D (`rotateX`, `perspective`) pour un rendu premium.
-
-> [!NOTE]
-> **Vérification des exercices 7 et 8**
->
-> Les consignes de ces deux exercices décrivent respectivement `layout` et une animation par caractère, mais les fichiers actuels n'utilisent pas encore ces fonctionnalités (`motion.div`/`layout` pour l'exercice 7 et `motion.span`/variants pour l'exercice 8). Il faut donc compléter leur implémentation pour que le code corresponde entièrement au cours.
 
 ---
 
