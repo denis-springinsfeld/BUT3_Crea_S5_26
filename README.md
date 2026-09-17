@@ -711,7 +711,7 @@ export default function Exercice0() {
 </details>
 
 <details>
-<summary>Solution Exo 1</summary>
+<summary>Solution Exo 1 Orchestration (Stagger)</summary>
 
 ```jsx
 import { motion } from "motion/react";
@@ -791,8 +791,10 @@ export default function Exercice1() {
 
 </details>
 
+---
+
 <details>
-<summary>Solution Exo 2</summary>
+<summary>Solution Exo 2 Keyframes et Boucles</summary>
 
 ```jsx
 import { motion } from "motion/react";
@@ -830,3 +832,381 @@ export default function Exercice2() {
   );
 }
 ```
+
+</details>
+
+---
+
+<details>
+<summary>Solution Exo 3 Interactions (Hover & Tap)</summary>
+
+```jsx
+import { motion } from "motion/react";
+
+/**
+ * ## Exercice 3 : Interactions (Hover & Tap)
+ * Objectif : Rendre l'interface réactive au curseur et au clic.
+ * - Créer un bouton interactif utilisant `whileHover` et `whileTap`.
+ * - Configurer une transition de type `spring` (ressort) avec `stiffness` et `damping`.
+ * - Utiliser des noms de variants sémantiques (`rest`, `hover`, `tap`).
+ */
+
+const buttonVariants = {
+  rest: { scale: 1 },
+  hover: {
+    scale: 1.1,
+    backgroundColor: "#d1d5db",
+    color: "#000000",
+    transition: { type: "spring", damping: 10, stiffness: 600 },
+  },
+  tap: { scale: 0.9 },
+};
+
+export default function Exercice3({ children = "Clic !", onClick }) {
+  return (
+    <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
+      <motion.button
+        onClick={onClick}
+        variants={buttonVariants}
+        initial="rest"
+        whileHover="hover"
+        whileTap="tap"
+        className="w-1/2 cursor-pointer rounded-lg bg-emerald-600 py-4 text-2xl font-light tracking-wide text-gray-100"
+      >
+        {children}
+      </motion.button>
+    </div>
+  );
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Solution Exo 4 Animation SVG</summary>
+
+```jsx
+import { motion } from "motion/react";
+
+/**
+ * ## Exercice 4 : Animation SVG
+ * Objectif : Animer des tracés vectoriels.
+ * - Utiliser `pathLength` pour faire "se dessiner" une icône SVG.
+ * - Définir des transitions spécifiques pour le tracé (`default`) et le remplissage (`fill`).
+ * - Utiliser `repeatType: "reverse"` pour un effet de va-et-vient.
+ */
+
+const svgIconVariants = {
+  hidden: {
+    opacity: 0,
+    pathLength: 0,
+    fill: "rgba(245, 158, 11, 0)",
+  },
+  visible: {
+    opacity: 1,
+    pathLength: 1,
+    fill: "rgba(245, 158, 11, 1)",
+    transition: {
+      default: {
+        duration: 2,
+        ease: "easeInOut",
+        delay: 1,
+        repeat: Infinity,
+        repeatType: "reverse",
+        repeatDelay: 1,
+      },
+      fill: {
+        duration: 2,
+        ease: "easeIn",
+        delay: 2,
+        repeat: Infinity,
+        repeatType: "reverse",
+        repeatDelay: 1,
+      },
+    },
+  },
+};
+
+export default function Exercice4() {
+  return (
+    <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
+      <motion.svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        className="w-1/2 stroke-amber-500 stroke-[0.5]"
+      >
+        <motion.path
+          d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
+          variants={svgIconVariants}
+          initial="hidden"
+          animate="visible"
+        />
+      </motion.svg>
+    </div>
+  );
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Solution Exo 5 Scroll Reveal</summary>
+
+```jsx
+import { motion } from "motion/react";
+/**
+ * ## Exercice 5 : Scroll Reveal
+ * Objectif : Déclencher des animations à l'entrée dans l'écran.
+ * - Utiliser `whileInView` au lieu de `animate`.
+ * - Configurer `viewport` avec `once: false` et `amount` pour contrôler le déclenchement.
+ * - Utiliser des noms sémantiques `offscreen` et `onscreen`.
+ */
+
+const containerVariants = {
+  offscreen: { opacity: 0 },
+  onscreen: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.3,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  offscreen: { opacity: 0, y: 50 },
+  onscreen: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      bounce: 0.4,
+      duration: 0.8,
+    },
+  },
+};
+
+export default function Exercice5() {
+  return (
+    <motion.section
+      className="mb-20 flex flex-col gap-10 py-20"
+      variants={containerVariants}
+      initial="offscreen"
+      whileInView="onscreen"
+      viewport={{ once: false, amount: 0.3 }}
+    >
+      <motion.h1
+        variants={itemVariants}
+        className="text-center text-6xl font-bold tracking-tight text-white"
+      >
+        Just Keep Scrolling
+      </motion.h1>
+
+      <motion.p
+        variants={itemVariants}
+        className="mx-auto max-w-2xl text-center text-3xl leading-relaxed font-light text-slate-300"
+      >
+        Il s'agit d'un exercice sur le déclenchement des animations au
+        défilement (Scroll Reveal) avec Motion.dev
+      </motion.p>
+
+      <motion.p
+        variants={itemVariants}
+        className="mx-auto max-w-2xl text-center text-3xl leading-relaxed font-light text-slate-300"
+      >
+        Grâce à whileInView, les éléments s'animent automatiquement lorsqu'ils
+        entrent dans la zone visible.
+      </motion.p>
+    </motion.section>
+  );
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Solution Exo 6 AnimatePresence</summary>
+
+```jsx
+/*## Exercice 6 : AnimatePresence (Sortie)
+**Objectif** : Animer la disparition d'un élément.
+- Utiliser le composant `<AnimatePresence>`.
+- Définir une propriété `exit` sur l'élément motion.
+- Créer un bouton pour masquer/afficher un élément avec une transition fluide à la fermeture.*/
+
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+
+export default function Exercice6() {
+  const [isVisible, setIsVisible] = useState(true);
+
+  return (
+    <div className="flex aspect-square flex-col items-center justify-center gap-10 rounded-lg bg-slate-800">
+      <button
+        onClick={() => setIsVisible(!isVisible)}
+        className="cursor-pointer rounded-lg bg-indigo-600 px-6 py-2 font-medium text-white transition-colors hover:bg-indigo-500"
+      >
+        {isVisible ? "Masquer" : "Afficher"}
+      </button>
+
+      {/* AnimatePresence est nécessaire pour les animations de sortie (exit) */}
+      <AnimatePresence mode="popLayout">
+        {isVisible && (
+          <motion.div
+            key="box"
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{
+              opacity: 0,
+              y: -20,
+              scale: 0.5,
+              transition: { duration: 0.2 },
+            }}
+            className="h-32 w-32 rounded-2xl bg-indigo-400 shadow-xl"
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Solution Exo 7 Layout Animations</summary>
+
+```jsx
+/*## Exercice 7 : Layout Animations
+**Objectif** : Animer les changements de structure CSS.
+- Utiliser la prop `layout`.
+- Créer un carré qui s'agrandit pour remplir son conteneur au clic.
+- Observer comment Motion gère automatiquement la transition de taille et de `borderRadius`.
+import { motion } from "motion/react";
+import { useState } from "react";*/
+
+export default function Exercice7() {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="flex aspect-square items-center justify-center rounded-lg bg-slate-800 p-8">
+      {/*
+        La prop 'layout' demande à Motion d'animer automatiquement
+        les changements de structure (taille, position)
+      */}
+      <motion.div
+        layout
+        onClick={() => setIsExpanded(!isExpanded)}
+        style={{
+          borderRadius: isExpanded ? "40px" : "12px",
+        }}
+        className={`cursor-pointer bg-pink-500 shadow-2xl ${
+          isExpanded ? "h-full w-full" : "h-24 w-24"
+        } flex items-center justify-center overflow-hidden`}
+      >
+        <motion.span
+          layout
+          className="font-bold tracking-tighter text-white uppercase"
+        >
+          {isExpanded ? "Click to shrink" : "Expand"}
+        </motion.span>
+      </motion.div>
+    </div>
+  );
+}
+```
+
+</details>
+
+---
+
+<details>
+<summary>Solution Exo 8 Text Animation</summary>
+
+```jsx
+/*
+## Exercice 8 : Text Animation (Par caractère)
+**Objectif** : Animer un texte lettre par lettre.
+- Découper un texte en tableau de caractères.
+- Utiliser `staggerChildren` pour un effet de "vague" ou de révélation séquentielle.
+- Ajouter des transformations 3D (`rotateX`, `perspective`) pour un rendu premium.
+*/
+import { motion } from "motion/react";
+
+const text = "L'ART DU MOUVEMENT";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.5,
+    },
+  },
+};
+
+const letterVariants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+    rotateX: -90,
+    scale: 0.5,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 12,
+      stiffness: 150,
+    },
+  },
+};
+
+export default function Exercice8() {
+  // On sépare le texte en lettres individuelles
+  const letters = Array.from(text);
+
+  return (
+    <div className="flex aspect-square items-center justify-center rounded-lg bg-slate-800 px-6">
+      <motion.h2
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: false }}
+        className="flex flex-wrap justify-center text-center text-4xl font-black tracking-tighter text-white md:text-5xl"
+        style={{ perspective: "1000px" }} // Ajoute de la profondeur pour la rotation X
+      >
+        {letters.map((letter, index) => (
+          <motion.span
+            key={index}
+            variants={letterVariants}
+            className="pointer-events-none inline-block"
+            style={{
+              marginRight: letter === " " ? "0.3em" : "0.02em",
+              minWidth: letter === " " ? "0.3em" : "auto",
+            }}
+          >
+            {letter}
+          </motion.span>
+        ))}
+      </motion.h2>
+    </div>
+  );
+}
+```
+
+</details>
+
+---
