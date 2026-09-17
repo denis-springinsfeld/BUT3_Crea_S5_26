@@ -705,6 +705,8 @@ export default function Exercice0() {
 
 </details>
 
+---
+
 <details>
 <summary>Solution Exo 1 Orchestration (Stagger)</summary>
 
