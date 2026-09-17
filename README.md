@@ -96,8 +96,6 @@ Pour animer un élément HTML, on remplace la balise standard par sa version `mo
 >
 > - 1. Créer un titre qui apparaît avec un fondu et un changement d'échelle. Utiliser `initial`, `animate` et `transition`.
 
-<
-
 ---
 
 # Partie 2 — Les Variants
@@ -201,9 +199,6 @@ const childVariants = {
 > **→ Exercice 0 partie 3** (`Exercice0.jsx`)
 >
 > - 3. Utiliser `delayChildren` et `staggerChildren` pour orchestrer les enfants.
-
-<details>
-<summary>Solution</summary>
 
 ```jsx
 import { motion } from "motion/react";
