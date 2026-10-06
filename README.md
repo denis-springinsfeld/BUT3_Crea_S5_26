@@ -1,6 +1,6 @@
 # TD préparatoires ToDo-List (React)
 
-> **Objectif** : Avant de se lancer dans le projet complet de la **Todo List**, cette série de petits exercices isolés permet de comprendre et pratiquer un par un les concepts fondamentaux de React (State, Props, Immutabilité, Listes).
+> **Objectif** : Avant de se lancer dans le projet complet de la **Todo List** pour une marque de votre choix, cette série de petits exercices isolés permet de comprendre et pratiquer un par un les concepts fondamentaux de React (State, Props, Immutabilité, Listes).
 
 Ces exercices sont conçus pour être réalisés rapidement dans un composant `App.jsx` de test. Pour chacun, copie le **starter** dans `App.jsx` puis complète les zones marquées `TODO`. Chaque exercice contient une ligne **✅ Tu as réussi si…** pour t'auto-évaluer. Les parties marquées **Bonus** sont facultatives, et les fichiers `index.css` fournis se copient tels quels : ils ne sont pas l'objet des exercices.
 
