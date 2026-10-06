@@ -1,1209 +1,715 @@
-# Motion (Ex Framer Motion)
+# TD préparatoires ToDo-List (React)
 
-[Docs motion pour React](https://motion.dev/docs/react)
+> **Objectif** : Avant de se lancer dans le projet complet de la **Todo List**, cette série de petits exercices isolés permet de comprendre et pratiquer un par un les concepts fondamentaux de React (State, Props, Immutabilité, Listes).
 
-Motion est une librairie d'animation pour React, qui permet de créer des animations fluides et performantes avec une API simple et intuitive.
-
-## Sommaire
-
-| N°  | Thème                          | Concepts clés                                                         |
-| :-: | :----------------------------- | :-------------------------------------------------------------------- |
-|  0  | Fondamentaux                   | `motion.*`, `initial`, `animate`, `transition`, `variants`, `stagger` |
-|  1  | Application (Orchestration)    | Propagation parent → enfants, `delayChildren`, `staggerChildren`      |
-|  2  | Keyframes et Boucles           | Tableaux de valeurs, `repeat`, `repeatType`                           |
-|  3  | Interactions (Hover & Tap)     | `whileHover`, `whileTap`, `spring`                                    |
-|  4  | Animation SVG                  | `pathLength`, transitions par propriété                               |
-|  5  | Scroll Reveal                  | `whileInView`, `viewport`                                             |
-|  6  | AnimatePresence (Sortie)       | `<AnimatePresence>`, `exit`                                           |
-|  7  | Layout Animations              | `layout`, transitions de taille/position                              |
-|  8  | Text Animation (Par caractère) | `Array.from`, `staggerChildren`, transforms 3D                        |
+Ces exercices sont conçus pour être réalisés rapidement dans un composant `App.jsx` de test. Pour chacun, copie le **starter** dans `App.jsx` puis complète les zones marquées `TODO`. Chaque exercice contient une ligne **✅ Tu as réussi si…** pour t'auto-évaluer. Les parties marquées **Bonus** sont facultatives, et les fichiers `index.css` fournis se copient tels quels : ils ne sont pas l'objet des exercices.
 
 ---
 
-## Installation
+## 🛠️ Mise en place
 
-Créer un nouveau projet ou utiliser un projet existant et installer les dépendances :
+Les exercices supposent un projet **Vite + React** avec **Tailwind CSS v4** (la syntaxe `bg-(--bg)` et `@import "tailwindcss"` n'existent qu'en v4). Si tu pars de zéro :
 
-> ```bash
-> npm install
+```bash
+npm create vite@latest todo-prep -- --template react
+cd todo-prep
+npm install tailwindcss @tailwindcss/vite
+npm install motion   # uniquement pour les bonus
+```
+
+Dans `vite.config.js`, ajoute le plugin Tailwind (voir la documentation officielle de Tailwind pour l'installation avec Vite) :
+
+```js
+import tailwindcss from "@tailwindcss/vite";
+// ...
+plugins: [react(), tailwindcss()],
+```
+
+Puis **remplace tout le contenu** de `src/index.css` par `@import "tailwindcss";` : le fichier généré par Vite contient des styles qui perturbent les exercices. Enfin, pour chaque exercice, remplace le contenu de `src/App.jsx` par le starter.
+
+Lance `npm run dev` et garde la **console du navigateur ouverte** : plusieurs exercices te demandent de vérifier qu'elle ne contient aucun avertissement.
+
+---
+
+## 📚 Concepts abordés
+
+1. `useState` basique et passage de Props, avec la destructuration _(Ex. 1)_
+2. La remontée d'état : communication enfant → parent _(Ex. 2)_
+3. Le rendu conditionnel (`? :` et `&&`) et les données dérivées _(Ex. 3)_
+4. L'affichage de listes (`.map` et la prop `key`) et l'ajout immutable _(Ex. 4)_
+5. L'immutabilité des tableaux d'objets : modifier et supprimer _(Ex. 5)_
+6. Le champ contrôlé : le state comme source de vérité _(Ex. 6)_
+7. Le champ non contrôlé et `FormData` _(Ex. 7)_
+8. Le filtrage dérivé d'une liste, sans state redondant _(Ex. 8)_
+9. Le state partagé entre composants frères (lifting state up) _(Ex. 9)_
+10. Le state local dans un enfant, combiné à une remontée au parent _(Ex. 10)_
+
+---
+
+## Exercice 1 : Le Bouton "J'aime" (State & Props)
+
+**Objectif :** Comprendre comment stocker une valeur et passer une fonction à un composant enfant.
+
+### Consignes
+
+1. Crée un composant `LikeButton` qui reçoit deux props : `count` (le nombre de likes) et `onLike` (la fonction à appeler quand on clique).
+2. Dans `App`, crée un state `likes` (initialisé à 0).
+3. Crée une fonction `handleLike` qui fait `setLikes((prev) => prev + 1)`.
+4. Affiche le composant `LikeButton` dans `App` en lui passant la valeur `likes` et la fonction `handleLike`.
+5. **Bonus (Motion)** : installe Motion (`npm install motion`), importe `motion` depuis `motion/react`, puis anime le bouton (`rest`, `hover`, `tap`) et le compteur (`hidden`, `visible`) avec des **variants**.
+
+> 💡 **Destructuration des props** : un composant reçoit **un seul objet** `props`. Ces deux écritures sont équivalentes ; la seconde extrait directement les champs dans les paramètres, c'est celle qu'on utilisera partout :
+>
+> ```jsx
+> function LikeButton(props) {
+>   return <button onClick={props.onLike}>{props.count}</button>;
+> }
+>
+> function LikeButton({ count, onLike }) {
+>   return <button onClick={onLike}>{count}</button>;
+> }
 > ```
 
-Installer la librairie Motion :
-
-> ```bash
-> npm install motion
-> ```
-
-Importer sur chaque composant React les éléments nécessaires depuis `motion/react` :
-
-```jsx
-import { motion } from "motion/react";
-```
-
----
-
-# Partie 1 — Les bases
-
-## 1.1 Le composant `motion.*`
-
-Pour animer un élément HTML, on remplace la balise standard par sa version `motion.` :
-
-```
-<h1>       →  <motion.h1>
-<div>      →  <motion.div>
-<button>   →  <motion.button>
-<span>     →  <motion.span>
-<svg>      →  <motion.svg>
-<path>     →  <motion.path>
-```
-
-## 1.2 Les propriétés fondamentales
-
-| Propriété    | Rôle                                         |
-| :----------- | :------------------------------------------- |
-| `initial`    | État de départ au montage du composant.      |
-| `animate`    | État cible de l'animation.                   |
-| `transition` | Façon dont on passe de `initial` → `animate` |
-| `exit`       | État avant le démontage du composant.        |
-
-### Exemple minimal
-
-```jsx
-<motion.h1
-  initial={{ opacity: 0, scale: 0.5 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ duration: 0.7 }}
-  className="text-5xl font-bold"
+> ⚠️ **Deux réflexes à prendre dès maintenant**
 >
-  Hello World !
-</motion.h1>
-```
+> - On **passe** la fonction (`onClick={onLike}`), on ne l'**appelle** pas (`onClick={onLike()}`) : on y revient à l'Exercice 2.
+> - Quand la nouvelle valeur **dépend de l'ancienne** (`likes + 1`), on utilise la forme fonctionnelle `setLikes((prev) => prev + 1)`. Quand elle n'en dépend pas (Ex. 2 : `setBgColor(color)`), on passe directement la valeur.
 
-## 1.3 Options de `transition`
+✅ **Tu as réussi si…** chaque clic ajoute 1 à la pastille, et `LikeButton` ne contient aucun `useState` : le state vit dans `App`.
 
-| Propriété  | Description              | Exemple                   |
-| :--------- | :----------------------- | :------------------------ |
-| `duration` | Durée en secondes        | `0.5`                     |
-| `delay`    | Délai avant le démarrage | `0.2`                     |
-| `ease`     | Courbe d'accélération    | `"easeInOut"`, `"linear"` |
-| `type`     | Type d'animation         | `"spring"` ou `"tween"`   |
-
-- **`tween`** : animation temporelle classique (défaut pour `opacity`, `color`, etc.)
-- **`spring`** : animation physique à ressort (défaut pour `scale`, `x`, `y`, `rotate`)
-
-> [!TIP]
-> **→ Exercice 0 Partie 1** (`Exercice0.jsx`)
->
-> - 1. Créer un titre qui apparaît avec un fondu et un changement d'échelle. Utiliser `initial`, `animate` et `transition`.
-
----
-
-# Partie 2 — Les Variants
-
-## 2.1 Principe
-
-Les **variants** permettent de définir des états d'animation nommés, séparés du JSX. C'est la méthode recommandée.
+### Starter
 
 ```jsx
-const myVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
-<motion.h1
-  variants={myVariants}
-  initial="hidden"
-  animate="visible"
-  className="text-5xl font-bold"
->
-  Hello World !
-</motion.h1>;
-```
-
-## 2.2 Avantages
-
-| Avantage        | Explication                                   |
-| :-------------- | :-------------------------------------------- |
-| Lisibilité      | JSX plus propre, logique séparée              |
-| Réutilisabilité | Mêmes variants sur plusieurs composants       |
-| Propagation     | Coordination automatique parent → enfants     |
-| Orchestration   | Synchronisation des animations avec `stagger` |
-
-## 2.3 Bonnes pratiques de nommage
-
-Utiliser des noms sémantiques décrivant l'état visuel :
-
-- `hidden` / `visible`
-- `open` / `closed`
-- `offscreen` / `onscreen`
-- `active` / `inactive`
-- `rest` / `hover` / `tap`
-
-> [!TIP]
-> **→ Exercice 0 partie 2** (`Exercice0.jsx`)
->
-> - 2. Définir des `variants` pour séparer la logique du design.
-
----
-
-# Partie 3 — Orchestration (Stagger)
-
-## 3.1 Propagation automatique
-
-Quand un parent `motion.*` a `animate="visible"`, ses enfants `motion.*` cherchent **automatiquement** le variant `visible` dans leur propre objet `variants`.
-
-> Pas besoin de remettre `initial` et `animate` sur chaque enfant.
-
-## 3.2 `delayChildren` et `staggerChildren`
-
-| Propriété         | Rôle                                                         |
-| :---------------- | :----------------------------------------------------------- |
-| `delayChildren`   | Déclenche l'animation de **tous** les enfants après un délai |
-| `staggerChildren` | Décale le démarrage de chaque enfant successivement          |
-
-Ces propriétés se placent dans la `transition` du variant **parent** :
-
-```jsx
-// Variants du PARENT
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      delayChildren: 0.2, // attend 0.2s avant le premier enfant
-      staggerChildren: 0.3, // 0.3s d'écart entre chaque enfant
-    },
-  },
-};
-
-// Variants des ENFANTS
-const childVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 },
-  },
-};
-```
-
-```jsx
-<motion.div variants={containerVariants} initial="hidden" animate="visible">
-  <motion.div variants={childVariants} /> {/* démarre à 0.2s */}
-  <motion.div variants={childVariants} /> {/* démarre à 0.5s */}
-  <motion.div variants={childVariants} /> {/* démarre à 0.8s */}
-</motion.div>
-```
-
-> [!TIP]
-> **→ Exercice 0 partie 3** (`Exercice0.jsx`)
->
-> - 3. Utiliser `delayChildren` et `staggerChildren` pour orchestrer les enfants.
-
-```jsx
-import { motion } from "motion/react";
-
-/**
- * ## Exercice 2 : Keyframes et Boucles
- * Objectif : Créer des animations cycliques complexes.
- * - Utiliser des tableaux de valeurs (keyframes) pour les propriétés `scale`, `rotate` et `borderRadius`.
- * - Mettre en place une boucle infinie avec `repeat: Infinity` et `repeatType: "reverse"`.
- */
-
-const keyframeVariant = {
-  animate: {
-    scale: [1, 2, 2, 1],
-    rotate: [0, 90, 90, 0],
-    borderRadius: ["10%", "10%", "50%", "10%"],
-    transition: {
-      duration: 5,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatDelay: 1,
-    },
-  },
-};
-
-export default function Exercice2() {
-  return (
-    <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
-      <motion.div
-        variants={keyframeVariant}
-        animate="animate"
-        className="h-1/3 w-1/3 bg-rose-400 shadow-xl"
-      ></motion.div>
-    </div>
-  );
-}
-```
-
-### Application
-
-> [!TIP]
-> **→ Exercice 1** (`Exercice1.jsx`)
->
-> - Créer un conteneur parent et deux enfants.
-> - Utiliser `delayChildren` et `staggerChildren` dans le variant parent pour décaler l'apparition des enfants.
-> - Faire venir un enfant du haut et l'autre du bas.
-
----
-
-# Partie 4 — Keyframes et Boucles
-
-## 4.1 Keyframes
-
-Au lieu d'une valeur unique, on passe un **tableau** pour créer une séquence d'états :
-
-```jsx
-<motion.div
-  animate={{
-    scale: [1, 2, 2, 1],
-    rotate: [0, 90, 180, 0],
-    borderRadius: ["20%", "20%", "50%", "20%"],
-  }}
-  transition={{ duration: 2 }}
-/>
-```
-
-Chaque étape se partage la durée totale de manière égale.
-
-## 4.2 Boucles
-
-| Propriété     | Valeur      | Description                            |
-| :------------ | :---------- | :------------------------------------- |
-| `repeat`      | `Infinity`  | Boucle infinie                         |
-| `repeat`      | `3`         | Répète 3 fois                          |
-| `repeatDelay` | `0.5`       | Pause entre deux cycles (en secondes)  |
-| `repeatType`  | `"loop"`    | Recommence au début                    |
-| `repeatType`  | `"reverse"` | Joue en sens inverse un cycle sur deux |
-| `repeatType`  | `"mirror"`  | Alterne aller / retour                 |
-
-```jsx
-transition={{
-  duration: 2,
-  repeat: Infinity,
-  repeatType: "reverse",
-}}
-```
-
-> [!TIP]
-> **→ Exercice 2** (`Exercice2.jsx`)
->
-> - Utiliser des tableaux de valeurs (keyframes) pour `scale`, `rotate` et `borderRadius`.
-> - Mettre en place une boucle infinie avec `repeat: Infinity` et `repeatType: "reverse"`.
-
----
-
-# Partie 5 — Interactions (Hover & Tap)
-
-## 5.1 Propriétés d'interaction
-
-| Propriété    | Déclencheur         |
-| :----------- | :------------------ |
-| `whileHover` | Survol de la souris |
-| `whileTap`   | Clic / toucher      |
-
-Ces propriétés acceptent un objet de style ou un nom de variant.
-
-## 5.2 Transition `spring` (ressort)
-
-| Propriété   | Rôle                                  | Valeur par défaut |
-| :---------- | :------------------------------------ | :---------------- |
-| `stiffness` | Tension du ressort (↑ = plus nerveux) | `100`             |
-| `damping`   | Amortissement (↓ = plus de rebond)    | `10`              |
-
-## 5.3 Exemple complet
-
-```jsx
-const buttonVariants = {
-  rest: { scale: 1 },
-  hover: {
-    scale: 1.1,
-    backgroundColor: "#d1d5db",
-    color: "#000000",
-    transition: { type: "spring", damping: 10, stiffness: 600 },
-  },
-  tap: { scale: 0.9 },
-};
-
-<motion.button
-  variants={buttonVariants}
-  initial="rest"
-  whileHover="hover"
-  whileTap="tap"
->
-  Subscribe
-</motion.button>;
-```
-
-> [!TIP]
-> **→ Exercice 3** (`Exercice3.jsx`)
->
-> - Créer un bouton interactif utilisant `whileHover` et `whileTap`.
-> - Configurer une transition de type `spring` avec `stiffness` et `damping`.
-> - Utiliser des noms de variants sémantiques (`rest`, `hover`, `tap`).
-
----
-
-# Partie 6 — Animation SVG
-
-## 6.1 Tracé de chemin (`pathLength`)
-
-| Valeur          | Rendu           |
-| :-------------- | :-------------- |
-| `pathLength: 0` | Tracé invisible |
-| `pathLength: 1` | Tracé complet   |
-
-En animant `pathLength` de `0` à `1`, on obtient l'effet "dessin progressif".
-
-## 6.2 Transitions par propriété
-
-On peut définir une transition **différente** pour chaque propriété animée :
-
-```jsx
-transition: {
-  default: { duration: 2, ease: "easeInOut" },  // pour pathLength
-  fill: { duration: 2, ease: "easeIn", delay: 1 } // pour fill (décalé)
-}
-```
-
-## 6.3 Exemple complet
-
-```jsx
-const svgIconVariants = {
-  hidden: {
-    pathLength: 0,
-    fill: "rgba(255, 255, 255, 0)",
-  },
-  visible: {
-    pathLength: 1,
-    fill: "rgba(255, 255, 255, 1)",
-    transition: {
-      default: { duration: 2, repeat: Infinity, repeatType: "reverse" },
-      fill: { duration: 2, ease: "easeIn", delay: 1 },
-    },
-  },
-};
-
-<motion.svg viewBox="0 0 24 24">
-  <motion.path
-    d="..."
-    variants={svgIconVariants}
-    initial="hidden"
-    animate="visible"
-    stroke="white"
-    strokeWidth={0.5}
-  />
-</motion.svg>;
-```
-
-> **Important** : Pour que `pathLength` fonctionne, il faut utiliser `<motion.path>` (pas `<path>`), et le SVG doit contenir un `stroke`.
-
-> [!TIP]
-> **→ Exercice 4** (`Exercice4.jsx`)
->
-> - Utiliser `pathLength` pour faire "se dessiner" une icône SVG.
-> - Définir des transitions spécifiques pour le tracé (`default`) et le remplissage (`fill`).
-> - Utiliser `repeatType: "reverse"` pour un effet de va-et-vient.
-
----
-
-# Partie 7 — Scroll Reveal (`whileInView`)
-
-## 7.1 Principe
-
-`whileInView` remplace `animate` pour déclencher l'animation **quand l'élément entre dans la zone visible** du navigateur.
-
-## 7.2 Propriétés
-
-| Propriété         | Rôle                                                        |
-| :---------------- | :---------------------------------------------------------- |
-| `whileInView`     | Lance l'animation quand l'élément entre dans le viewport    |
-| `viewport.once`   | Si `true`, joue une seule fois (ne revient pas à `initial`) |
-| `viewport.amount` | Proportion de l'élément qui doit être visible (`0` à `1`)   |
-| `viewport.margin` | Marge virtuelle de déclenchement (ex: `"-100px"`)           |
-
-## 7.3 Exemple
-
-```jsx
-const variants = {
-  offscreen: { opacity: 0, y: 50 },
-  onscreen: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", duration: 0.8 },
-  },
-};
-
-<motion.div
-  variants={variants}
-  initial="offscreen"
-  whileInView="onscreen"
-  viewport={{ once: false, amount: 0.5 }}
-/>;
-```
-
-- `once: false` → l'animation se rejoue à chaque entrée/sortie
-- `amount: 0.5` → l'élément doit être visible à 50% pour déclencher
-
-> [!TIP]
-> **→ Exercice 5** (`Exercice5.jsx`)
->
-> - Utiliser `whileInView` au lieu de `animate`.
-> - Configurer `viewport` avec `once: false` et `amount` pour contrôler le déclenchement.
-> - Utiliser des noms sémantiques `offscreen` et `onscreen`.
-
----
-
-# Partie 8 — AnimatePresence (Sortie)
-
-## 8.1 Le problème
-
-Sans `AnimatePresence`, React **retire immédiatement** un composant du DOM quand la condition de rendu devient `false`. Aucune animation de sortie n'est possible.
-
-## 8.2 La solution
-
-`<AnimatePresence>` enveloppe les éléments conditionnels et leur permet de jouer leur animation `exit` avant d'être retirés du DOM.
-
-```jsx
-import { motion, AnimatePresence } from "motion/react";
-```
-
-## 8.3 Propriétés
-
-| Propriété          | Rôle                             |
-| :----------------- | :------------------------------- |
-| `initial`          | État d'entrée                    |
-| `animate`          | État stable                      |
-| `exit`             | État de sortie (avant démontage) |
-| `mode="popLayout"` | Évite les sauts de layout        |
-
-## 8.4 Exemple
-
-```jsx
-const [isVisible, setIsVisible] = useState(true);
-
-<AnimatePresence mode="popLayout">
-  {isVisible && (
-    <motion.div
-      key="box"
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0 }}
-      transition={{ duration: 0.3 }}
-      className="h-32 w-32 rounded-2xl bg-indigo-400"
-    />
-  )}
-</AnimatePresence>;
-```
-
-> **Important** : L'élément conditionnel doit avoir une prop `key` unique pour que Motion puisse suivre son cycle de vie.
-
-> [!TIP]
-> **→ Exercice 6** (`Exercice6.jsx`)
->
-> - Utiliser le composant `<AnimatePresence>`.
-> - Définir une propriété `exit` sur l'élément motion.
-> - Créer un bouton pour masquer/afficher un élément avec une transition fluide à la fermeture.
-
----
-
-# Partie 9 — Layout Animations
-
-## 9.1 Principe
-
-La prop `layout` anime **automatiquement** les changements de taille, position et `borderRadius` quand la mise en page CSS change.
-
-```jsx
-<motion.div layout />
-```
-
-## 9.2 Comment ça marche
-
-1. Motion capture la position/taille **avant** le re-render
-2. React effectue le re-render (changement de classes, taille, position…)
-3. Motion capture la **nouvelle** position/taille
-4. Motion anime la transition entre les deux états via `transform`
-
-## 9.3 Exemple
-
-```jsx
-const [isExpanded, setIsExpanded] = useState(false);
-
-<motion.div
-  layout
-  onClick={() => setIsExpanded(!isExpanded)}
-  style={{
-    width: isExpanded ? "100%" : "96px",
-    height: isExpanded ? "100%" : "96px",
-    borderRadius: isExpanded ? "40px" : "12px",
-  }}
-  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-  className="cursor-pointer bg-pink-500"
-/>;
-```
-
-> **Cas d'usage** : accordéons, cartes expansibles, grilles réorganisables.
-
-> [!TIP]
-> **→ Exercice 7** (`Exercice7.jsx`)
->
-> - Utiliser la prop `layout`.
-> - Créer un carré qui s'agrandit pour remplir son conteneur au clic.
-> - Observer comment Motion gère automatiquement la transition de taille et de `borderRadius`.
-
----
-
-# Partie 10 — Text Animation (Par caractère)
-
-## 10.1 Méthode
-
-1. **Découper** le texte en tableau de caractères avec `Array.from()` ou `.split("")`
-2. **Envelopper** chaque caractère dans un `<motion.span>`
-3. **Orchestrer** avec `staggerChildren` sur le conteneur parent
-
-## 10.2 Points clés
-
-| Point               | Détail                                          |
-| :------------------ | :---------------------------------------------- |
-| `display`           | Chaque lettre doit être en `inline-block`       |
-| `staggerChildren`   | Sur le conteneur pour décaler chaque lettre     |
-| Gestion des espaces | Prévoir un `minWidth` ou `marginRight` pour ` ` |
-| `perspective`       | Optionnel, pour les effets de rotation 3D       |
-
-## 10.3 Exemple
-
-```jsx
-const text = "Hello World";
-const letters = Array.from(text);
-
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.05 },
-  },
-};
-
-const letterVariants = {
-  hidden: { opacity: 0, y: 20, rotateX: -90 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    transition: { type: "spring", damping: 12 },
-  },
-};
-
-<motion.h1
-  variants={containerVariants}
-  initial="hidden"
-  animate="visible"
-  style={{ perspective: 500 }}
->
-  {letters.map((letter, index) => (
-    <motion.span
-      key={index}
-      variants={letterVariants}
-      className="inline-block"
-      style={{
-        marginRight: letter === " " ? "0.3em" : "0.02em",
-        minWidth: letter === " " ? "0.3em" : "auto",
-      }}
-    >
-      {letter}
-    </motion.span>
-  ))}
-</motion.h1>;
-```
-
-> [!TIP]
-> **→ Exercice 8** (`Exercice8.jsx`)
->
-> - Découper un texte en tableau de caractères.
-> - Utiliser `staggerChildren` pour un effet de vague ou de révélation séquentielle.
-> - Ajouter des transformations 3D (`rotateX`, `perspective`) pour un rendu premium.
-
----
-
-## Récapitulatif — Tous les états d'animation
-
-| Propriété     | Déclencheur                        |
-| :------------ | :--------------------------------- |
-| `initial`     | Montage du composant               |
-| `animate`     | Immédiat (état cible)              |
-| `exit`        | Démontage (avec `AnimatePresence`) |
-| `whileHover`  | Survol                             |
-| `whileTap`    | Clic / toucher                     |
-| `whileInView` | Entrée dans le viewport            |
-| `whileDrag`   | Pendant un glisser-déposer         |
-
----
-
-# Solutions
-
-<details>
-
-<summary>Solution Exo 0</summary>
-
-```jsx
-import { motion } from "motion/react";
-
-// Utilisation de Variants pour définir les états de l'animation
-// 'hidden' : état initial
-// 'visible' : état final
-// 'transition' : paramètres de l'animation
-//  'delayChildren': déclenche l'animation de tous les enfants après un délai
-//  'staggerChildren': déclenche les animations des enfants les unes après les autres
-const containerVariants = {
-  hidden: { opacity: 0, y: -50 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-
-      // delayChildren: déclenche l'animation de tous les enfants après un délai
-      delayChildren: 1,
-      // staggerChildren: déclenche les animations des enfants les unes après les autres
-      staggerChildren: 2,
-    },
-  },
-};
-
-const spanVariants = {
-  hidden: { opacity: 0, scale: 0, rotate: -180 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    rotate: 0,
-    transition: { duration: 0.5, type: "spring", stiffness: 200 },
-  },
-};
-
-export default function Exercice0() {
-  return (
-    <motion.h1
-      className="text-5xl font-bold"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      Hello{" "}
-      <motion.span
-        className="inline-block text-blue-500"
-        variants={spanVariants}
-      >
-        World&nbsp;
-      </motion.span>
-      <motion.span className="inline-block" variants={spanVariants}>
-        !!
-      </motion.span>
-    </motion.h1>
-  );
-}
-```
-
-</details>
-
----
-
-<details>
-<summary>Solution Exo 1 Orchestration (Stagger)</summary>
-
-```jsx
-import { motion } from "motion/react";
-
-/**
- * ## Exercice 1 : Orchestration (Stagger)
- *  Objectif : Animer plusieurs éléments de manière séquentielle.
- * - Créer un conteneur parent et deux enfants.
- * - Utiliser `staggerChildren` dans le variant parent pour décaler l'apparition des enfants.
- * - Faire venir un enfant du haut et l'autre du bas.
- */
-
-/**
- * Un conteneur parent qui anime ses enfants de manière séquentielle.
- */
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      delayChildren: 1, // Délai avant le début de l'animation des enfants
-      staggerChildren: 1, // Délai entre l'apparition des deux éléments
-    },
-  },
-};
-
-/**
- * Un carré qui provient du bas.
- */
-
-const itemBottomVariants = {
-  hidden: { opacity: 0, y: 100 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
-  },
-};
-
-/**
- * Un cercle qui provient du haut.
- */
-
-const itemTopVariants = {
-  hidden: { opacity: 0, y: -100 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
-  },
-};
-
-export default function Exercice1() {
-  return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800"
-    >
-      {/* Carré : provient du bas */}
-      <motion.div
-        variants={itemBottomVariants}
-        className="h-20 w-20 rounded-lg bg-stone-100"
-      ></motion.div>
-
-      {/* Cercle : provient du haut */}
-      <motion.div
-        variants={itemTopVariants}
-        className="h-20 w-20 rounded-full bg-stone-100"
-      ></motion.div>
-    </motion.div>
-  );
-}
-```
-
-</details>
-
----
-
-<details>
-<summary>Solution Exo 2 Keyframes et Boucles</summary>
-
-```jsx
-import { motion } from "motion/react";
-
-/**
- * ## Exercice 2 : Keyframes et Boucles
- * Objectif : Créer des animations cycliques complexes.
- * - Utiliser des tableaux de valeurs (keyframes) pour les propriétés `scale`, `rotate` et `borderRadius`.
- * - Mettre en place une boucle infinie avec `repeat: Infinity` et `repeatType: "reverse"`.
- */
-
-const keyframeVariant = {
-  animate: {
-    scale: [1, 2, 2, 1],
-    rotate: [0, 90, 90, 0],
-    borderRadius: ["10%", "10%", "50%", "10%"],
-    transition: {
-      duration: 5,
-      ease: "easeInOut",
-      repeat: Infinity,
-      repeatDelay: 1,
-    },
-  },
-};
-
-export default function Exercice2() {
-  return (
-    <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
-      <motion.div
-        variants={keyframeVariant}
-        animate="animate"
-        className="h-1/3 w-1/3 bg-rose-400 shadow-xl"
-      ></motion.div>
-    </div>
-  );
-}
-```
-
-</details>
-
----
-
-<details>
-<summary>Solution Exo 3 Interactions (Hover & Tap)</summary>
-
-```jsx
-import { motion } from "motion/react";
-
-/**
- * ## Exercice 3 : Interactions (Hover & Tap)
- * Objectif : Rendre l'interface réactive au curseur et au clic.
- * - Créer un bouton interactif utilisant `whileHover` et `whileTap`.
- * - Configurer une transition de type `spring` (ressort) avec `stiffness` et `damping`.
- * - Utiliser des noms de variants sémantiques (`rest`, `hover`, `tap`).
- */
-
-const buttonVariants = {
-  rest: { scale: 1 },
-  hover: {
-    scale: 1.1,
-    backgroundColor: "#d1d5db",
-    color: "#000000",
-    transition: { type: "spring", damping: 10, stiffness: 600 },
-  },
-  tap: { scale: 0.9 },
-};
-
-export default function Exercice3({ children = "Clic !", onClick }) {
-  return (
-    <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
-      <motion.button
-        onClick={onClick}
-        variants={buttonVariants}
-        initial="rest"
-        whileHover="hover"
-        whileTap="tap"
-        className="w-1/2 cursor-pointer rounded-lg bg-emerald-600 py-4 text-2xl font-light tracking-wide text-gray-100"
-      >
-        {children}
-      </motion.button>
-    </div>
-  );
-}
-```
-
-</details>
-
----
-
-<details>
-<summary>Solution Exo 4 Animation SVG</summary>
-
-```jsx
-import { motion } from "motion/react";
-
-/**
- * ## Exercice 4 : Animation SVG
- * Objectif : Animer des tracés vectoriels.
- * - Utiliser `pathLength` pour faire "se dessiner" une icône SVG.
- * - Définir des transitions spécifiques pour le tracé (`default`) et le remplissage (`fill`).
- * - Utiliser `repeatType: "reverse"` pour un effet de va-et-vient.
- */
-
-const svgIconVariants = {
-  hidden: {
-    opacity: 0,
-    pathLength: 0,
-    fill: "rgba(245, 158, 11, 0)",
-  },
-  visible: {
-    opacity: 1,
-    pathLength: 1,
-    fill: "rgba(245, 158, 11, 1)",
-    transition: {
-      default: {
-        duration: 2,
-        ease: "easeInOut",
-        delay: 1,
-        repeat: Infinity,
-        repeatType: "reverse",
-        repeatDelay: 1,
-      },
-      fill: {
-        duration: 2,
-        ease: "easeIn",
-        delay: 2,
-        repeat: Infinity,
-        repeatType: "reverse",
-        repeatDelay: 1,
-      },
-    },
-  },
-};
-
-export default function Exercice4() {
-  return (
-    <div className="flex aspect-square items-center justify-center gap-10 rounded-lg bg-slate-800">
-      <motion.svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        className="w-1/2 stroke-amber-500 stroke-[0.5]"
-      >
-        <motion.path
-          d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
-          variants={svgIconVariants}
-          initial="hidden"
-          animate="visible"
-        />
-      </motion.svg>
-    </div>
-  );
-}
-```
-
-</details>
-
----
-
-<details>
-<summary>Solution Exo 5 Scroll Reveal</summary>
-
-```jsx
-import { motion } from "motion/react";
-/**
- * ## Exercice 5 : Scroll Reveal
- * Objectif : Déclencher des animations à l'entrée dans l'écran.
- * - Utiliser `whileInView` au lieu de `animate`.
- * - Configurer `viewport` avec `once: false` et `amount` pour contrôler le déclenchement.
- * - Utiliser des noms sémantiques `offscreen` et `onscreen`.
- */
-
-const containerVariants = {
-  offscreen: { opacity: 0 },
-  onscreen: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.3,
-      delayChildren: 0.2,
-    },
-  },
-};
-
-const itemVariants = {
-  offscreen: { opacity: 0, y: 50 },
-  onscreen: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      bounce: 0.4,
-      duration: 0.8,
-    },
-  },
-};
-
-export default function Exercice5() {
-  return (
-    <motion.section
-      className="mb-20 flex flex-col gap-10 py-20"
-      variants={containerVariants}
-      initial="offscreen"
-      whileInView="onscreen"
-      viewport={{ once: false, amount: 0.3 }}
-    >
-      <motion.h1
-        variants={itemVariants}
-        className="text-center text-6xl font-bold tracking-tight text-white"
-      >
-        Just Keep Scrolling
-      </motion.h1>
-
-      <motion.p
-        variants={itemVariants}
-        className="mx-auto max-w-2xl text-center text-3xl leading-relaxed font-light text-slate-300"
-      >
-        Il s'agit d'un exercice sur le déclenchement des animations au
-        défilement (Scroll Reveal) avec Motion.dev
-      </motion.p>
-
-      <motion.p
-        variants={itemVariants}
-        className="mx-auto max-w-2xl text-center text-3xl leading-relaxed font-light text-slate-300"
-      >
-        Grâce à whileInView, les éléments s'animent automatiquement lorsqu'ils
-        entrent dans la zone visible.
-      </motion.p>
-    </motion.section>
-  );
-}
-```
-
-</details>
-
----
-
-<details>
-<summary>Solution Exo 6 AnimatePresence</summary>
-
-```jsx
-/*## Exercice 6 : AnimatePresence (Sortie)
-**Objectif** : Animer la disparition d'un élément.
-- Utiliser le composant `<AnimatePresence>`.
-- Définir une propriété `exit` sur l'élément motion.
-- Créer un bouton pour masquer/afficher un élément avec une transition fluide à la fermeture.*/
-
-import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
-export default function Exercice6() {
-  const [isVisible, setIsVisible] = useState(true);
+function LikeButton({ count, onLike }) {
+  // TODO : le bouton appelle onLike au clic
+  // TODO : affiche le compteur (count) dans la pastille
+  return (
+    <button className="relative rounded bg-pink-500 px-4 py-2 text-white">
+      ❤️ J'aime
+      <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
+        {/* TODO */}
+      </span>
+    </button>
+  );
+}
+
+export default function App() {
+  // TODO : déclare le state likes (initialisé à 0)
+  // TODO : déclare la fonction handleLike
 
   return (
-    <div className="flex aspect-square flex-col items-center justify-center gap-10 rounded-lg bg-slate-800">
-      <button
-        onClick={() => setIsVisible(!isVisible)}
-        className="cursor-pointer rounded-lg bg-indigo-600 px-6 py-2 font-medium text-white transition-colors hover:bg-indigo-500"
-      >
-        {isVisible ? "Masquer" : "Afficher"}
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 1</h1>
+      {/* TODO : affiche <LikeButton /> avec ses props */}
+    </div>
+  );
+}
+```
+
+---
+
+## Exercice 2 : La Remontée d'État (Enfant vers Parent)
+
+**Objectif :** Comprendre comment un composant enfant peut transmettre une information à son parent via une fonction de rappel (callback) et pratiquer la destructuration des props.
+
+### Consignes
+
+1. Crée un composant enfant `ColorPicker` qui reçoit une prop **déstructurée** `{ onColorSelect }`.
+2. Dans `ColorPicker`, crée deux boutons ("Rouge" et "Bleu"). Au clic sur le bouton rouge, appelle `onColorSelect("red")`. Au clic sur le bleu, appelle `onColorSelect("blue")`.
+3. Dans le parent `App`, crée un state `bgColor` (initialisé à `"white"`).
+4. Affiche le composant `ColorPicker` en lui passant une fonction qui met à jour `bgColor` avec la couleur reçue.
+5. Applique la couleur de fond à la div principale de `App` avec `style={{ backgroundColor: bgColor }}`.
+6. **Bonus 1 (variables CSS)** : remplace le style en ligne par une variable CSS : ``style={{ "--bg": `var(--clr-${bgColor})` }}`` et la classe `bg-(--bg)`. Le fichier `index.css` fourni plus bas définit `--clr-white`, `--clr-red` et `--clr-blue`.
+7. **Bonus 2 (Motion)** : anime les boutons avec des variants (`rest`, `hover`, `tap`) et le nom de la couleur affichée (`hidden`, `visible`).
+
+> ⚠️ **Pourquoi `() => onColorSelect("red")` et pas `onColorSelect("red")` ?** `onClick` attend **une fonction** que React appellera au moment du clic. Écrire `onClick={onColorSelect("red")}` **exécute** `onColorSelect` immédiatement, pendant le rendu, et passe son résultat (`undefined`) à `onClick` : le state est modifié pendant le rendu, ce qui déclenche un nouveau rendu, et ainsi de suite (« Too many re-renders »). Dès qu'il faut passer un argument, on enveloppe donc l'appel dans une fonction fléchée. Sans argument (Ex. 1), on passe la fonction telle quelle : `onClick={onLike}`.
+
+✅ **Tu as réussi si…** un clic sur « Rouge » ou « Bleu » change à la fois le fond de la page et le texte « Couleur actuelle », et `ColorPicker` n'a aucun state.
+
+### Starter
+
+```jsx
+import { useState } from "react";
+
+// TODO : déstructure la prop { onColorSelect }
+function ColorPicker() {
+  return (
+    <div className="mb-4 flex gap-2">
+      {/* TODO : onClick → onColorSelect("red") */}
+      <button className="rounded bg-red-500 px-3 py-1 text-white">Rouge</button>
+      {/* TODO : onClick → onColorSelect("blue") */}
+      <button className="rounded bg-blue-500 px-3 py-1 text-white">Bleu</button>
+    </div>
+  );
+}
+
+export default function App() {
+  // TODO : state bgColor (initialisé à "white")
+  // TODO : fonction handleColorChange(color) qui met à jour bgColor
+
+  return (
+    // TODO : ajoute style={{ backgroundColor: bgColor }}
+    <div className="min-h-screen p-8 transition-colors">
+      <h1 className="mb-4 text-xl">Exercice 2</h1>
+      {/* TODO : affiche <ColorPicker /> avec sa prop */}
+
+      <p>
+        Couleur actuelle : <strong>{/* TODO */}</strong>
+      </p>
+    </div>
+  );
+}
+```
+
+### Bonus 1 — fichier fourni : `index.css`
+
+Pour passer aux variables CSS, remplace `index.css` par ce fichier :
+
+```css
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --clr-white: #ffffff;
+    --clr-red: #ef4444;
+    --clr-blue: #3b82f6;
+  }
+}
+```
+
+> 💡 **Pourquoi `var(--clr-${bgColor})` plutôt qu'une classe `bg-${bgColor}` ?** Tailwind génère son CSS en lisant tes fichiers **tels qu'ils sont écrits** : une classe construite dynamiquement (`bg-${bgColor}`) n'apparaît jamais en entier dans le code, donc elle n'est jamais générée. Une variable CSS, elle, est résolue par le navigateur au moment de l'affichage.
+
+---
+
+## Exercice 3 : Mode Sombre (Rendu conditionnel & Données dérivées)
+
+**Objectif :** Modifier l'interface dynamiquement selon une condition, sans créer de state inutile.
+
+### Consignes
+
+1. Dans `App`, crée un state `isDarkMode` (booléen, initialisé à `false`).
+2. Crée un bouton qui inverse ce state avec la forme fonctionnelle (`prev => !prev`).
+3. **Conditionnel texte** : Le bouton doit afficher "Passer en mode Sombre" ou "Passer en mode Clair" selon le state.
+4. **Donnée dérivée** : Crée une variable `themeClass` juste avant le `return` qui vaut `"dark"` si `isDarkMode` est vrai, sinon `""`.
+5. Ajoute `themeClass` à la `className` de la `<div>` principale (les classes `text-fg bg-bg` y sont déjà).
+6. **Rendu conditionnel** : affiche « Bienvenue du côté obscur ! » uniquement en mode sombre (avec `&&`).
+7. Copie dans `index.css` le fichier fourni ci-dessous : les tokens de couleurs y sont déjà définis et la classe `.dark` inverse les couleurs.
+8. **Bonus (Motion)** : anime le bouton avec des variants (`rest`, `hover`, `tap`) et le message avec `AnimatePresence` (`hidden`, `visible`, `exit`).
+
+> ⚠️ **Piège classique avec `&&`** : `{count && <p>…</p>}` affiche littéralement `0` quand `count` vaut `0` (React sait afficher un nombre, contrairement à `false`). Pour une condition numérique, écris `{count > 0 && …}` ou utilise un ternaire.
+
+✅ **Tu as réussi si…** le bouton alterne ses deux textes, les couleurs s'inversent, le message n'apparaît qu'en mode sombre, et `App` ne contient qu'un seul `useState` (`themeClass` n'en est pas un).
+
+### Fichier fourni : `index.css`
+
+```css
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: var(--clr-bg);
+  --color-fg: var(--clr-fg);
+}
+
+@layer base {
+  :root {
+    /* Tokens primitifs */
+    --clr-white: #ffffff;
+    --clr-dark: #1a1a1a;
+
+    /* Tokens sémantiques */
+    --clr-fg: var(--clr-dark);
+    --clr-bg: var(--clr-white);
+  }
+
+  .dark {
+    --clr-fg: var(--clr-white);
+    --clr-bg: var(--clr-dark);
+  }
+}
+```
+
+### Starter
+
+```jsx
+import { useState } from "react";
+
+export default function App() {
+  // TODO : state isDarkMode (false au départ)
+  // TODO : fonction toggleDarkMode (utilise la forme prev => !prev)
+
+  // TODO : donnée dérivée themeClass (pas de useState pour ça !)
+
+  return (
+    // TODO : ajoute themeClass à la className
+    <div className="text-fg bg-bg min-h-screen p-8 transition-colors">
+      <h1 className="mb-4 text-xl">Exercice 3</h1>
+      <button className="rounded border px-4 py-2">
+        {/* TODO : texte conditionnel selon isDarkMode */}
       </button>
 
-      {/* AnimatePresence est nécessaire pour les animations de sortie (exit) */}
-      <AnimatePresence mode="popLayout">
-        {isVisible && (
-          <motion.div
-            key="box"
-            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{
-              opacity: 0,
-              y: -20,
-              scale: 0.5,
-              transition: { duration: 0.2 },
-            }}
-            className="h-32 w-32 rounded-2xl bg-indigo-400 shadow-xl"
-          />
-        )}
-      </AnimatePresence>
+      {/* TODO : rendu conditionnel avec && */}
     </div>
   );
 }
 ```
 
-</details>
-
 ---
 
-<details>
-<summary>Solution Exo 7 Layout Animations</summary>
+## Exercice 4 : L'Inventaire (Rendu de liste & Ajout immutable)
+
+**Objectif :** Afficher un tableau et y ajouter un élément sans utiliser `.push()`.
+
+### Consignes
+
+1. Crée un state `items` contenant un tableau d'objets `{ id, name }` : `Pomme` et `Banane`. L'`id` est une valeur aléatoire générée avec `crypto.randomUUID()`.
+2. Affiche ce tableau sous forme de liste `<ul>` en utilisant `.map()`, avec `item.id` comme prop `key`.
+3. Ajoute un bouton "Ajouter une Cerise". Au clic, il doit ajouter un nouvel objet `Cerise` avec son propre `id` aléatoire.
+   _Rappel : crée d'abord l'objet avec `id: crypto.randomUUID()`, puis ajoute-le avec `setItems((currentItems) => [...currentItems, newItem])`._
+
+> ⚠️ **À retenir sur `key` et `randomUUID`**
+>
+> - L'`id` se génère **à la création** de l'élément, jamais dans le JSX : `key={crypto.randomUUID()}` (ou `Math.random()`) changerait à chaque rendu, et React détruirait puis recréerait toute la liste. Évite aussi l'index du `.map` comme `key` dès que la liste peut être réordonnée ou filtrée.
+> - `crypto.randomUUID()` n'existe que dans un **contexte sécurisé** : HTTPS ou `localhost`. Si tu testes depuis un téléphone via l'IP de ton PC en HTTP (ex. `http://192.168.x.x:5173`), il sera `undefined`.
+
+✅ **Tu as réussi si…** trois clics ajoutent trois « Cerise » à la liste, sans aucun avertissement `key` dans la console.
+
+### Starter
 
 ```jsx
-/*## Exercice 7 : Layout Animations
-**Objectif** : Animer les changements de structure CSS.
-- Utiliser la prop `layout`.
-- Créer un carré qui s'agrandit pour remplir son conteneur au clic.
-- Observer comment Motion gère automatiquement la transition de taille et de `borderRadius`.
-import { motion } from "motion/react";
-import { useState } from "react";*/
+import { useState } from "react";
 
-export default function Exercice7() {
-  const [isExpanded, setIsExpanded] = useState(false);
+export default function App() {
+  // TODO : state items (Pomme, Banane), chacun avec un id aléatoire
+  // Astuce : useState(() => [...]) n'exécute la fonction qu'au premier rendu
+  // (sinon randomUUID serait rappelé à chaque rendu pour rien)
+
+  const addItem = () => {
+    // ⚠️ Interdit : items.push(...) puis setItems(items)
+    // TODO : crée d'abord un objet Cerise avec un id unique, puis ajoute-le
+    // avec setItems((currentItems) => [...currentItems, newItem])
+  };
 
   return (
-    <div className="flex aspect-square items-center justify-center rounded-lg bg-slate-800 p-8">
-      {/*
-        La prop 'layout' demande à Motion d'animer automatiquement
-        les changements de structure (taille, position)
-      */}
-      <motion.div
-        layout
-        onClick={() => setIsExpanded(!isExpanded)}
-        style={{
-          borderRadius: isExpanded ? "40px" : "12px",
-        }}
-        className={`cursor-pointer bg-pink-500 shadow-2xl ${
-          isExpanded ? "h-full w-full" : "h-24 w-24"
-        } flex items-center justify-center overflow-hidden`}
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 4</h1>
+      <button
+        onClick={addItem}
+        className="mb-4 rounded bg-green-500 px-4 py-2 text-white"
       >
-        <motion.span
-          layout
-          className="font-bold tracking-tighter text-white uppercase"
-        >
-          {isExpanded ? "Click to shrink" : "Expand"}
-        </motion.span>
-      </motion.div>
+        Ajouter une Cerise 🍒
+      </button>
+
+      <ul className="list-disc pl-5">{/* TODO : .map() avec la prop key */}</ul>
     </div>
   );
 }
 ```
 
-</details>
-
 ---
 
-<details>
-<summary>Solution Exo 8 Text Animation</summary>
+## Exercice 5 : Le Tableau de Bord (Modifier & Supprimer avec des Objets)
+
+**Objectif :** C'est le cœur de la Todo List ! Apprendre à modifier ou supprimer un objet spécifique dans un tableau d'objets.
+
+### Consignes
+
+1. Pars de ce state initial (à mettre dans `App`) :
+   ```javascript
+   const [users, setUsers] = useState([
+     { id: 1, name: "Alice", active: true },
+     { id: 2, name: "Bob", active: false },
+   ]);
+   ```
+2. Affiche chaque utilisateur (`name`) et son statut ("🟢 Actif" ou "🔴 Inactif").
+3. **Suppression** : Ajoute un bouton "Supprimer" à côté de chaque user. Il doit appeler une fonction `deleteUser(id)` qui utilise `.filter()` pour enlever le user du tableau.
+4. **Modification** : Ajoute un bouton "Basculer statut" qui appelle `toggleUser(id)`. Cette fonction doit utiliser `.map()` pour trouver le user et inverser son booléen `active`.
+
+✅ **Tu as réussi si…** « Supprimer » retire uniquement la ligne cliquée, « Basculer statut » ne modifie que la ligne cliquée, et ton code n'utilise ni `push`, ni `splice`, ni affectation directe (`user.active = …`).
+
+### Starter
 
 ```jsx
-/*
-## Exercice 8 : Text Animation (Par caractère)
-**Objectif** : Animer un texte lettre par lettre.
-- Découper un texte en tableau de caractères.
-- Utiliser `staggerChildren` pour un effet de "vague" ou de révélation séquentielle.
-- Ajouter des transformations 3D (`rotateX`, `perspective`) pour un rendu premium.
-*/
-import { motion } from "motion/react";
+import { useState } from "react";
 
-const text = "L'ART DU MOUVEMENT";
+export default function App() {
+  const [users, setUsers] = useState([
+    { id: 1, name: "Alice", active: true },
+    { id: 2, name: "Bob", active: false },
+  ]);
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.5,
-    },
-  },
-};
+  const deleteUser = (id) => {
+    // TODO : garde tous les users SAUF celui qui a cet id (.filter)
+  };
 
-const letterVariants = {
-  hidden: {
-    opacity: 0,
-    y: 40,
-    rotateX: -90,
-    scale: 0.5,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    scale: 1,
-    transition: {
-      type: "spring",
-      damping: 12,
-      stiffness: 150,
-    },
-  },
-};
-
-export default function Exercice8() {
-  // On sépare le texte en lettres individuelles
-  const letters = Array.from(text);
+  const toggleUser = (id) => {
+    // TODO : recrée le tableau avec .map() et inverse active uniquement
+    // pour l'utilisateur dont l'id correspond (copie avec { ...user, ... })
+  };
 
   return (
-    <div className="flex aspect-square items-center justify-center rounded-lg bg-slate-800 px-6">
-      <motion.h2
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: false }}
-        className="flex flex-wrap justify-center text-center text-4xl font-black tracking-tighter text-white md:text-5xl"
-        style={{ perspective: "1000px" }} // Ajoute de la profondeur pour la rotation X
-      >
-        {letters.map((letter, index) => (
-          <motion.span
-            key={index}
-            variants={letterVariants}
-            className="pointer-events-none inline-block"
-            style={{
-              marginRight: letter === " " ? "0.3em" : "0.02em",
-              minWidth: letter === " " ? "0.3em" : "auto",
-            }}
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 5</h1>
+
+      <ul className="space-y-2">
+        {users.map((user) => (
+          <li
+            key={user.id}
+            className="flex items-center justify-between rounded border p-4"
           >
-            {letter}
-          </motion.span>
+            <span>{/* TODO : nom + statut "🟢 Actif" / "🔴 Inactif" */}</span>
+
+            <div className="flex gap-2">
+              {/* TODO : ajoute onClick → toggleUser(user.id) au bouton ci-dessous */}
+              <button className="rounded bg-blue-500 px-3 py-1 text-sm text-white">
+                Basculer statut
+              </button>
+
+              {/* TODO : ajoute onClick → deleteUser(user.id) au bouton ci-dessous */}
+              <button className="rounded bg-red-500 px-3 py-1 text-sm text-white">
+                Supprimer
+              </button>
+            </div>
+          </li>
         ))}
-      </motion.h2>
+      </ul>
     </div>
   );
 }
 ```
 
-</details>
+---
+
+## Exercice 6 : Le Champ Contrôlé (State miroir)
+
+**Objectif :** Comprendre comment lier la valeur d'un champ de saisie à une variable d'état React : le state alimente `value`, et `onChange` le met à jour (un flux **unidirectionnel**, malgré l'impression de « two-way binding »).
+
+### Consignes
+
+1. Crée un composant `ControlledInput` qui reçoit deux props `{ value, onChange }` et retourne un `<input type="text">`.
+2. Dans `App`, crée un state `text` initialisé à une chaîne vide `""`.
+3. Passe `text` à la prop `value` de `ControlledInput`, qui la branche sur l'attribut `value` de l'input.
+4. Passe à la prop `onChange` une fonction qui met à jour le state (`setText(e.target.value)`) ; `ControlledInput` la branche sur l'événement `onChange` de l'input.
+5. Affiche la valeur de `text` en temps réel sous l'input.
+
+> ⚠️ **Piège classique** : un champ contrôlé doit toujours recevoir une `value` définie, dès le premier rendu. Si tu initialises avec `useState()` (donc `undefined`) au lieu de `useState("")`, React affiche l'avertissement _"A component is changing an uncontrolled input to be controlled"_ dès que tu tapes un premier caractère. Pars toujours d'une chaîne vide `""`, jamais de `undefined` ou `null`.
+
+> ♿ **Accessibilité** : un `placeholder` disparaît à la saisie et ne remplace pas un label. Les starters utilisent un `aria-label` ; dans une vraie interface, préfère un `<label>` visible.
+
+✅ **Tu as réussi si…** ce que tu tapes s'affiche immédiatement sous le champ (« — » quand il est vide), et la console n'affiche aucun avertissement « uncontrolled to controlled ».
+
+### Starter
+
+```jsx
+import { useState } from "react";
+
+// TODO : reçoit les props { value, onChange }
+function ControlledInput() {
+  return (
+    <input
+      type="text"
+      // TODO : value et onChange
+      placeholder="Tapez ici..."
+      aria-label="Texte libre"
+      className="rounded border px-3 py-2"
+    />
+  );
+}
+
+export default function App() {
+  // TODO : state text (chaîne vide au départ)
+
+  return (
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 6</h1>
+      {/* TODO : <ControlledInput /> avec value et onChange */}
+      <p className="mt-4">
+        Valeur : <strong>{/* TODO : text ou "—" si vide */}</strong>
+      </p>
+    </div>
+  );
+}
+```
 
 ---
+
+## Exercice 7 : Le Champ Non Contrôlé (FormData & Remontée d'état)
+
+**Objectif :** Créer un composant formulaire indépendant qui s'occupe de lire les données du DOM sans state React, et qui remonte uniquement la valeur finale au parent.
+
+### Consignes
+
+1. Crée un composant `UncontrolledInput` qui reçoit des props `{ name, placeholder, buttonText, onSubmit }`.
+2. Dans `UncontrolledInput`, crée un `<form>` avec un `<input type="text" name={name} />` et un `<button>`. (Pas de `value` ni `onChange` !). Ajoute l'attribut `required` pour que le navigateur refuse un champ vide.
+3. Toujours dans `UncontrolledInput`, intercepte la soumission (`onSubmit` du `<form>`), empêche le rechargement (`e.preventDefault()`), récupère la valeur avec `new FormData(e.currentTarget).get(name)`, et passe-la au parent via la prop `onSubmit(valeur)` si elle est bien une chaîne non vide après `trim()`. Puis vide le formulaire avec `e.currentTarget.reset()` (`currentTarget` est le `<form>` sur lequel on a branché `onSubmit`).
+4. Dans `App`, utilise `<UncontrolledInput name="username" onSubmit={...} />` pour récupérer le nom et l'afficher dans une alerte.
+
+> 💡 **Pourquoi généraliser avec une prop `name` ?** Un composant figé sur `"username"` ne peut servir qu'une fois dans l'appli. En passant `name` (et `placeholder`, `buttonText`) en props, le même composant peut servir aussi bien pour saisir un pseudo que pour ajouter une tâche dans le TD — c'est exactement la version qu'on y réutilisera.
+
+✅ **Tu as réussi si…** un champ vide ou composé d'espaces n'ouvre aucune alerte ; avec « Léa », l'alerte affiche « Bonjour, Léa ! » puis le champ se vide, sans aucun `useState` dans `UncontrolledInput`.
+
+### Starter
+
+```jsx
+function UncontrolledInput({ name, placeholder, buttonText, onSubmit }) {
+  const handleSubmit = (e) => {
+    // TODO : empêche le rechargement de la page
+    // TODO : récupère la valeur avec new FormData(e.currentTarget).get(name)
+    // TODO : si la valeur (trim) n'est pas vide, appelle onSubmit(valeur)
+    // TODO : vide le formulaire avec e.currentTarget.reset()
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="text"
+        // TODO : name, placeholder et required
+        aria-label={placeholder}
+        className="rounded border px-3 py-2"
+      />
+      <button
+        type="submit"
+        className="rounded bg-blue-600 px-4 py-2 text-white"
+      >
+        {/* TODO : buttonText */}
+      </button>
+    </form>
+  );
+}
+
+export default function App() {
+  const handleNameSubmit = (name) => {
+    // TODO : affiche `Bonjour, ${name} !` dans une alerte
+  };
+
+  return (
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 7</h1>
+      {/* TODO : <UncontrolledInput /> avec toutes ses props */}
+    </div>
+  );
+}
+```
+
+### 🤔 Contrôlé vs non contrôlé : lequel choisir ?
+
+|                          | Exercice 6 (contrôlé)                                                                           | Exercice 7 (non contrôlé)                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Source de vérité         | Le state React (`value={text}`)                                                                 | Le DOM (le navigateur garde la valeur)                                         |
+| Re-rendu à chaque frappe | Oui                                                                                             | Non                                                                            |
+| Pratique pour...         | Valider en temps réel, afficher un compteur de caractères, désactiver un bouton selon la saisie | Un simple formulaire "remplir puis envoyer", sans besoin de lire chaque frappe |
+| Code                     | Un peu plus verbeux (`value` + `onChange`)                                                      | Plus court, mais moins flexible pendant la saisie                              |
+
+C'est pour cette raison — un formulaire d'ajout qui n'a besoin de la valeur qu'au moment de l'envoi — que le TD de la Todo List part sur un champ **non contrôlé** pour `UncontrolledInput`. Si plus tard tu avais besoin, par exemple, de désactiver le bouton "Ajouter" tant que le champ est vide, il faudrait basculer ce champ en contrôlé.
+
+> 🚀 **Pour aller plus loin (React 19)** : avec React 19, `<form action={...}>` reçoit directement le `FormData` (plus besoin de `preventDefault`) et réinitialise automatiquement les champs non contrôlés une fois l'action terminée. Vérifie la version de React de ton projet avant de l'utiliser ; le TD reste sur `onSubmit` + `preventDefault`, qui fonctionne partout.
+
+---
+
+## Exercice 8 : Le Filtre à Films (Donnée dérivée sur une liste)
+
+**Objectif :** Afficher un sous-ensemble d'un tableau selon un filtre, **sans** dupliquer la liste dans un second state. L'exercice 3 l'a déjà introduit sur une simple classe CSS (`themeClass`), ici on l'applique à un `.map()`.
+
+### Consignes
+
+1. Pars de ce state initial :
+   ```javascript
+   const [movies, setMovies] = useState([
+     { id: 1, title: "Dune", watched: true },
+     { id: 2, title: "Interstellar", watched: false },
+     { id: 3, title: "Oppenheimer", watched: false },
+   ]);
+   ```
+2. Crée un state `filter` initialisé à `"all"` (valeurs possibles : `"all"`, `"watched"`, `"unwatched"`).
+3. **Juste avant le `return`**, crée un objet `filters` dont les clés sont `"all"`, `"watched"` et `"unwatched"` (comme `themeClass` à l'exercice 3, mais ici ce sont des tableaux, pas des strings). Associe chaque clé au tableau correspondant :
+   - `"all"` → `movies`
+   - `"watched"` → `movies.filter((movie) => movie.watched)`
+   - `"unwatched"` → `movies.filter((movie) => !movie.watched)`
+
+   Puis récupère la liste à afficher avec `const visibleMovies = filters[filter];`.
+
+4. Affiche trois boutons ("Tous", "Vus", "À voir") qui changent `filter` au clic. Le bouton du filtre actif doit se distinguer visuellement (et porter `aria-pressed`). Affiche aussi, entre parenthèses, le nombre de films de chaque catégorie : réutilise les tableaux de `filters` (par exemple `filters.watched.length`) plutôt que de refaire un `.filter()`.
+5. Utilise `visibleMovies` (et non `movies`) dans le `.map()` d'affichage.
+6. **Piège à éviter** : ne crée surtout pas `const [visibleMovies, setVisibleMovies] = useState([])` avec un `useEffect` pour la synchroniser — ce serait un state redondant, source de bugs (deux sources de vérité à garder synchronisées). Une simple variable calculée au fil du rendu suffit.
+7. **Bonus** : ajoute sur chaque film un bouton qui bascule `watched` (comme `toggleUser` à l'Ex. 5). Observe que la liste **et** les compteurs se mettent à jour sans aucun code supplémentaire : c'est tout l'intérêt d'une donnée dérivée.
+
+✅ **Tu as réussi si…** la liste et les compteurs suivent le filtre choisi, le bouton actif se distingue, et `App` n'a que deux `useState` (`movies` et `filter`) et aucun `useEffect`.
+
+### Starter
+
+```jsx
+import { useState } from "react";
+
+export default function App() {
+  const [movies, setMovies] = useState([
+    { id: 1, title: "Dune", watched: true },
+    { id: 2, title: "Interstellar", watched: false },
+    { id: 3, title: "Oppenheimer", watched: false },
+  ]);
+  // TODO : state filter ("all" | "watched" | "unwatched")
+
+  // TODO : crée l'objet filters (all, watched, unwatched)
+  // TODO : calcule visibleMovies avec filters[filter] (pas un state !)
+  // BONUS : fonction toggleWatched(id), comme toggleUser à l'Ex. 5
+
+  return (
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 8</h1>
+
+      <div className="mb-4 flex gap-2">
+        {/* TODO : 3 boutons qui appellent setFilter, avec le compteur entre parenthèses,
+            un style différent pour le filtre actif et aria-pressed */}
+        <button className="rounded border px-3 py-1">Tous</button>
+        <button className="rounded border px-3 py-1">Vus</button>
+        <button className="rounded border px-3 py-1">À voir</button>
+      </div>
+
+      <ul className="space-y-1">
+        {/* TODO : .map() sur visibleMovies, affiche 🟢 ou ⚪ + le titre */}
+        {/* BONUS : un bouton par film qui bascule watched (setMovies + .map) */}
+      </ul>
+    </div>
+  );
+}
+```
+
+---
+
+## Exercice 9 : Le Panier (State partagé entre deux composants frères)
+
+**Objectif :** Jusqu'ici, chaque exercice n'avait qu'**un seul** enfant qui parlait au parent. Ici, **deux composants frères** vont partager le même state : l'un l'écrit, l'autre l'affiche. C'est exactement la structure du TD (`UncontrolledInput` qui ajoute une tâche, et la liste de `TodoItem` qui l'affiche et la modifie) — deux enfants distincts d'un même `App`.
+
+### Consignes
+
+1. Dans `App`, crée un state `cart` (tableau d'articles `{ cartItemId, id, name, price }`), initialisé vide `[]`. `cartItemId` est un identifiant unique généré avec `crypto.randomUUID()` (comme à l'Ex. 4) : si on ajoute deux fois le même produit, les deux lignes du panier doivent avoir des `key` différentes.
+2. Crée un composant `ProductCatalog` qui reçoit une prop `onAddToCart` (une fonction). Il affiche 2-3 produits fixes (listés dans une constante `PRODUCTS`, définie hors du composant) avec un bouton "Ajouter" chacun, qui appelle `onAddToCart(produit)`.
+3. Crée un composant **frère** `CartSummary` qui reçoit une prop `items` (le tableau du panier) et affiche la liste des articles ajoutés, ainsi que le total (calculé avec `reduce`).
+4. Dans `App`, affiche `<ProductCatalog onAddToCart={...} />` **et** `<CartSummary items={cart} />` côte à côte. Vérifie que cliquer sur "Ajouter" dans le catalogue met bien à jour le résumé, alors que ce sont deux composants complètement différents qui ne se connaissent pas directement.
+
+> 💡 **Le point clé** : `ProductCatalog` et `CartSummary` ne communiquent **jamais directement entre eux**. Ils ne savent même pas que l'autre existe. Le seul lien, c'est `App`, qui détient le state et le distribue : une fonction vers l'un, la donnée vers l'autre. C'est ce qu'on appelle la **remontée d'état (lifting state up)** — c'est exactement le rôle que joue `App.jsx` dans le TD entre le formulaire d'ajout et la liste des tâches.
+
+✅ **Tu as réussi si…** ajouter deux fois « Café » crée deux lignes distinctes (sans avertissement `key`) et un total correct, et `CartSummary` n'a aucun state.
+
+### Starter
+
+```jsx
+import { useState } from "react";
+
+const PRODUCTS = [
+  { id: 1, name: "Café", price: 3 },
+  { id: 2, name: "Croissant", price: 2 },
+  { id: 3, name: "Jus d'orange", price: 4 },
+];
+
+// Premier enfant : il ÉCRIT dans le state du parent, il ne le lit jamais.
+function ProductCatalog({ onAddToCart }) {
+  return (
+    <div className="rounded border p-4">
+      <h2 className="mb-2 font-bold">Produits</h2>
+      {/* TODO : PRODUCTS.map() → nom, prix et bouton "Ajouter" (onAddToCart) */}
+    </div>
+  );
+}
+
+// Second enfant, FRÈRE du premier : il LIT le state du parent, il ne le modifie jamais.
+function CartSummary({ items }) {
+  // TODO : calcule le total avec reduce
+
+  return (
+    <div className="rounded border p-4">
+      <h2 className="mb-2 font-bold">Panier ({/* TODO */})</h2>
+      {/* TODO : "Panier vide" si items est vide, sinon la liste des articles */}
+      <p className="font-semibold">Total : {/* TODO */} €</p>
+    </div>
+  );
+}
+
+export default function App() {
+  // TODO : state cart ([] au départ)
+  // TODO : fonction addToCart(product) (immutabilité !)
+
+  return (
+    <div className="grid grid-cols-2 gap-4 p-8">
+      {/* TODO : <ProductCatalog /> et <CartSummary /> avec leurs props */}
+    </div>
+  );
+}
+```
+
+---
+
+## Exercice 10 : La Carte Éditable (State local + remontée au parent)
+
+**Objectif :** Jusqu'ici, les composants enfants étaient soit de purs afficheurs (props seulement), soit n'avaient pas de state du tout (`UncontrolledInput`). Ici, l'enfant va avoir **son propre state local** (`isEditing`, `draft`) **en plus** de ses props — et ne remonter au parent que la valeur finale, une fois validée. C'est exactement le mécanisme de `TodoItem` à l'étape 4 du TD.
+
+### Consignes
+
+1. Dans `App`, crée un state `username` (string), initialisé à `"Alice"`.
+2. Crée un composant enfant `EditableCard` qui reçoit deux props : `value` (le texte actuel) et `onSave` (fonction appelée avec le nouveau texte).
+3. **Dans `EditableCard`** (pas dans `App` !), crée deux states **locaux** :
+   - `isEditing` (booléen, `false` au départ)
+   - `draft` (string, initialisé avec `value`)
+4. **Mode lecture** (`isEditing === false`) : affiche `value` (pas `draft`) et un bouton "Modifier" qui **recopie `value` dans `draft`** puis passe `isEditing` à `true`.
+5. **Mode édition** (`isEditing === true`) : affiche un `<form>` contenant un `<input>` **contrôlé** par `draft` (`value={draft}`, `onChange` met à jour `draft`), un bouton "Valider" (`type="submit"`) et un bouton "Annuler" (`type="button"`).
+6. À la soumission du formulaire (clic sur "Valider" **ou** touche Entrée) : `e.preventDefault()`, puis, si `draft.trim()` n'est pas vide, appelle `onSave(draft.trim())` et repasse `isEditing` à `false`. Si le brouillon est vide, ne fais rien.
+7. Au clic sur "Annuler" : repasse `isEditing` à `false` **sans** appeler `onSave`. Vérifie qu'en cliquant ensuite sur "Modifier", le champ repart bien de la valeur actuelle et non de ton ancien brouillon.
+8. Dans `App`, affiche `<EditableCard value={username} onSave={setUsername} />` et vérifie que le texte affiché par `EditableCard` se met bien à jour après validation.
+
+> 💡 **Le point clé** : pendant l'édition, `draft` (local, propre à `EditableCard`) peut diverger de `value` (la prop venue du parent) — c'est voulu, c'est un brouillon. Ce n'est qu'au clic sur "Valider" que la nouvelle valeur est **remontée** au parent via `onSave`, qui met à jour son propre state (`username`), qui redescend ensuite en tant que nouvelle prop `value`. Deux states, deux responsabilités : `isEditing`/`draft` ne regardent que l'enfant, `username` appartient au parent.
+
+> ⚠️ **Piège : copier une prop dans un state.** `useState(value)` n'utilise `value` que **lors du premier rendu** : si la prop change ensuite, `draft` ne suit pas. C'est pourquoi on resynchronise explicitement `draft` à l'ouverture de l'édition (`setDraft(value)`). Sans cela, « Annuler » puis « Modifier » ressortirait l'ancien brouillon.
+
+✅ **Tu as réussi si…** « Valider » (ou Entrée) met à jour le parent, un brouillon vide n'est pas enregistré, « Annuler » ne change rien, et en rouvrant l'édition le champ repart de la valeur actuelle.
+
+### Starter
+
+```jsx
+import { useState } from "react";
+
+function EditableCard({ value, onSave }) {
+  // TODO : state local isEditing (false au départ)
+  // TODO : state local draft (initialisé avec value)
+
+  const startEditing = () => {
+    // TODO : recopie value dans draft, puis passe en mode édition
+  };
+
+  const cancel = () => {
+    // TODO : repasse en mode lecture, sans appeler onSave
+  };
+
+  const handleSubmit = (e) => {
+    // TODO : e.preventDefault()
+    // TODO : si draft.trim() n'est pas vide → onSave(draft.trim()) puis repasse en mode lecture
+  };
+
+  return (
+    <div className="rounded border p-4">
+      {/* TODO : si isEditing → <form onSubmit={handleSubmit}> avec un <input> contrôlé par draft,
+          un bouton "Valider" (type="submit") et un bouton "Annuler" (type="button") */}
+      {/* TODO : sinon → <span>{value}</span> + bouton "Modifier" (startEditing) */}
+    </div>
+  );
+}
+
+export default function App() {
+  // TODO : state username ("Alice" au départ)
+
+  return (
+    <div className="p-8">
+      <h1 className="mb-4 text-xl">Exercice 10</h1>
+      {/* TODO : <EditableCard /> avec value et onSave */}
+      <p className="mt-4 text-sm text-gray-500">
+        Valeur stockée dans le parent : <strong>{/* TODO */}</strong>
+      </p>
+    </div>
+  );
+}
+```
+
+---
+
+## 🎯 Conclusion
+
+Si tu maîtrises **l'Exercice 4** (l'Inventaire : ajout immutable), **l'Exercice 5** (le Tableau de Bord), **l'Exercice 6** (le Champ Contrôlé, indispensable à l'édition de l'Ex. 10), **l'Exercice 7** (le Champ Non Contrôlé), **l'Exercice 8** (le Filtre à Films), **l'Exercice 9** (le Panier) et **l'Exercice 10** (la Carte Éditable), tu as les bases nécessaires pour attaquer le TD de la Todo List. Le principe sera exactement le même : deux composants frères (`UncontrolledInput` et la liste de `TodoItem`) qui partagent le state `todos` détenu par `App`, un formulaire qui remonte un texte, un tableau d'objets, `.map()` pour afficher, `.map()` pour cocher/éditer, `.filter()` pour supprimer, un state local dans `TodoItem` pour l'édition, et une variable dérivée pour filtrer l'affichage.
