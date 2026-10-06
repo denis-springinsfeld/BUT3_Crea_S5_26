@@ -75,7 +75,7 @@ Lance `npm run dev` et garde la **console du navigateur ouverte** : plusieurs ex
 > - On **passe** la fonction (`onClick={onLike}`), on ne l'**appelle** pas (`onClick={onLike()}`) : on y revient à l'Exercice 2.
 > - Quand la nouvelle valeur **dépend de l'ancienne** (`likes + 1`), on utilise la forme fonctionnelle `setLikes((prev) => prev + 1)`. Quand elle n'en dépend pas (Ex. 2 : `setBgColor(color)`), on passe directement la valeur.
 
-✅ **Tu as réussi si…** chaque clic ajoute 1 à la pastille, et `LikeButton` ne contient aucun `useState` : le state vit dans `App`.
+✅ **Resultat attendu** : chaque clic ajoute 1 à la pastille, et `LikeButton` ne contient aucun `useState` : le state vit dans `App`.
 
 ### Starter
 
