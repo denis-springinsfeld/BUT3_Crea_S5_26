@@ -31,7 +31,7 @@ Lance `npm run dev` et garde la **console du navigateur ouverte** : plusieurs ex
 
 ---
 
-## 📚 Concepts abordés
+## Concepts abordés
 
 1. `useState` basique et passage de Props, avec la destructuration _(Ex. 1)_
 2. La remontée d'état : communication enfant → parent _(Ex. 2)_
