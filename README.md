@@ -710,6 +710,10 @@ export default function App() {
 
 ---
 
-## 🎯 Conclusion
+## Pour demain TP Todo List
 
-Si tu maîtrises **l'Exercice 4** (l'Inventaire : ajout immutable), **l'Exercice 5** (le Tableau de Bord), **l'Exercice 6** (le Champ Contrôlé, indispensable à l'édition de l'Ex. 10), **l'Exercice 7** (le Champ Non Contrôlé), **l'Exercice 8** (le Filtre à Films), **l'Exercice 9** (le Panier) et **l'Exercice 10** (la Carte Éditable), tu as les bases nécessaires pour attaquer le TD de la Todo List. Le principe sera exactement le même : deux composants frères (`UncontrolledInput` et la liste de `TodoItem`) qui partagent le state `todos` détenu par `App`, un formulaire qui remonte un texte, un tableau d'objets, `.map()` pour afficher, `.map()` pour cocher/éditer, `.filter()` pour supprimer, un state local dans `TodoItem` pour l'édition, et une variable dérivée pour filtrer l'affichage.
+> - Vous allez développer une application web de gestion de tâches (todo list) en React, qui fonctionne entièrement dans le navigateur, sans compte ni serveur. Un seul type d'utilisateur : la personne qui note et suit ses tâches.
+
+**Avant le TP, rédigez le backlog de user stories de cette application.**
+
+> - Style graphique au choix: https://getdesign.md
