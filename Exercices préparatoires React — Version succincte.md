@@ -199,6 +199,7 @@ export default function App() {
 
 **À retenir :**
 
+- On n'utilise jamais `push` sur un state, on crée un nouveau tableau avec `[...current, newItem]`.
 - L'`id` se génère à la création de l'élément, jamais dans le JSX (`key={crypto.randomUUID()}` recréerait toute la liste à chaque rendu). On évite l'index comme `key` si la liste peut être réordonnée ou filtrée. `crypto.randomUUID()` exige HTTPS ou `localhost`.
 
 ## Exercice 5 — Le tableau de bord (modifier & supprimer des objets)
