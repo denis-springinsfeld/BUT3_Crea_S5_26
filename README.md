@@ -241,11 +241,12 @@ Ouvrez l'onglet **Réseau** des DevTools : une nouvelle requête part à chaque 
 ### Suite...
 
 - Créez un composant `Loader` et un composant `ErrorMessage` réutilisables dans tous vos écrans.
-- Ajoutez un bouton « J'aime » qui garde les favoris dans un state.
 
 ## Exercice 2 — API Rick and Morty
 
-Nous allons maintenant utiliser l'API [Rick and Morty](https://rickandmortyapi.com/documentation) pour créer une liste de personnages avec un champ de recherche.
+Vous allez maintenant utiliser l'API [Rick and Morty](https://rickandmortyapi.com/documentation) pour créer une liste de personnages avec un champ de recherche.
+
+Testez cette nouvelle API.
 
 Pour le prochain TD proposer user-stories et wireframes d'une application qui utilise l'API Rick and Morty.
 
